@@ -1,0 +1,109 @@
+name: Fetch Job from URL
+
+on:
+  repository_dispatch:
+    types: [fetch-job]
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install node-fetch cheerio
+
+      - name: Fetch and parse job
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          JOB_PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          node << 'EOF'
+          const fetch = (await import('node-fetch')).default;
+          const cheerio = (await import('cheerio')).load;
+          const fs = require('fs');
+
+          const payload = JSON.parse(process.env.JOB_PAYLOAD);
+          const { url, sections, id, posted } = payload;
+
+          let pageText = '';
+          try {
+            const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 10000 });
+            const html = await res.text();
+            const $ = cheerio(html);
+            $('script, style, nav, footer, header').remove();
+            pageText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 6000);
+          } catch (e) {
+            console.log('Could not fetch page, using URL only:', e.message);
+          }
+
+          const prompt = `Extract job information from this job posting page content. Return ONLY valid JSON, nothing else.
+
+Page URL: ${url}
+Page content: ${pageText || 'Could not fetch page content'}
+
+Return this exact JSON structure:
+{
+  "title": "job title",
+  "company": "company name",
+  "location": "city or location",
+  "deadline": "YYYY-MM-DD or empty string if not found",
+  "description": "full job description, max 1000 words, preserve paragraph breaks with \\n\\n"
+}`;
+
+          const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.1 }
+              })
+            }
+          );
+
+          const geminiData = await geminiRes.json();
+          const raw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const clean = raw.replace(/```json|```/g, '').trim();
+
+          let extracted = {};
+          try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error:', e.message); }
+
+          // Load existing jobs
+          let jobs = [];
+          try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) {}
+
+          const newJob = {
+            id,
+            title: extracted.title || 'Ukjent stilling',
+            company: extracted.company || '',
+            location: extracted.location || 'Oslo',
+            deadline: extracted.deadline || '',
+            desc: extracted.description || '',
+            sections,
+            url,
+            posted
+          };
+
+          jobs.push(newJob);
+          fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
+          console.log('Job saved:', newJob.title);
+          EOF
+
+      - name: Commit jobs.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add jobs.json
+          git diff --staged --quiet || git commit -m "Add job: ${{ github.event.client_payload.id }}"
+          git push
