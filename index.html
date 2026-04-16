@@ -15,10 +15,11 @@
     --coral-light: #FAECE7; --coral-mid: #D85A30; --coral-dark: #712B13;
     --amber-light: #FAEEDA; --amber-mid: #BA7517; --amber-dark: #633806;
     --bg: #F7F5F0; --card: #ffffff; --text: #1a1a18; --text-muted: #6b6b67;
-    --border: rgba(0,0,0,0.1); --border-hover: rgba(0,0,0,0.18);
+    --border: rgba(0,0,0,0.1); --border-hover: rgba(0,0,0,0.22);
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
+  /* Header */
   header { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 50; }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-mark { width: 40px; height: 40px; background: #0C447C; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #E6F1FB; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; }
@@ -34,10 +35,12 @@
   .btn-ui.add-main:hover { background: #0C447C; border-color: #0C447C; }
   .btn-ui.logout-btn { color: #b91c1c; }
 
+  /* Hero */
   .hero { background: #fff; border-bottom: 1px solid var(--border); padding: 2.5rem 2rem 2rem; }
   .hero h1 { font-family: 'DM Serif Display', serif; font-size: 32px; font-weight: 400; margin-bottom: 6px; }
   .hero p { color: var(--text-muted); font-size: 14px; }
 
+  /* Filters */
   .filters { background: #fff; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .filter-label { font-size: 12px; color: var(--text-muted); margin-right: 4px; text-transform: uppercase; letter-spacing: .5px; }
   .bubble { padding: 6px 16px; border-radius: 100px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; color: var(--text-muted); font-family: 'DM Sans', sans-serif; transition: all .15s; }
@@ -47,7 +50,12 @@
   .bubble.active-mek { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
   .bubble.active-it { background: var(--purple-light); border-color: var(--purple-mid); color: var(--purple-dark); }
 
-  main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  /* Layout with side panel */
+  .page-body { display: flex; align-items: flex-start; }
+  main { flex: 1; padding: 2rem; max-width: 100%; min-width: 0; transition: max-width .3s ease; }
+  main.panel-open { max-width: 520px; }
+
+  /* Sections */
   .section { margin-bottom: 2.5rem; }
   .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
   .section-super { padding: 3px 12px; border-radius: 100px; font-size: 11px; font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
@@ -57,9 +65,12 @@
   .section-name { font-size: 16px; font-weight: 500; }
   .section-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
 
-  .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .job-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; transition: border-color .15s, box-shadow .15s; }
-  .job-card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+  /* Job cards */
+  .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .job-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; transition: border-color .15s, box-shadow .15s; cursor: pointer; }
+  .job-card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+  .job-card.active { border-color: #185FA5; box-shadow: 0 0 0 2px rgba(24,95,165,0.15); }
+
   .card-dept-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 100px; margin-bottom: 8px; }
   .tag-bygg { background: var(--blue-light); color: var(--blue-dark); }
   .tag-energi { background: var(--teal-light); color: var(--teal-dark); }
@@ -67,28 +78,76 @@
   .tag-elektro { background: var(--purple-light); color: var(--purple-dark); }
   .tag-kjemi { background: var(--coral-light); color: var(--coral-dark); }
   .tag-it { background: var(--amber-light); color: var(--amber-dark); }
+
   .job-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
   .job-company { font-size: 13px; color: var(--text-muted); }
   .job-location { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .job-desc { font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 8px; }
-  .job-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; opacity: 0; transition: opacity .15s; font-family: sans-serif; display: none; }
+  .job-snippet { font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .job-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; opacity: 0; transition: opacity .15s; font-family: sans-serif; display: none; z-index: 2; }
   .job-card:hover .job-delete { opacity: 1; }
   .job-delete:hover { background: #fef2f2; color: #b91c1c; }
   body.is-admin .job-delete { display: block; }
+
   .add-card { background: none; border: 1.5px dashed var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; cursor: pointer; display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); font-family: 'DM Sans', sans-serif; transition: all .15s; width: 100%; }
   .add-card:hover { border-color: var(--border-hover); color: var(--text); background: rgba(0,0,0,.02); }
   body.is-admin .add-card { display: flex; }
   .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; grid-column: 1/-1; }
 
+  /* Detail panel */
+  .detail-panel {
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+    transition: width .3s ease, min-width .3s ease;
+    position: sticky;
+    top: 68px;
+    height: calc(100vh - 68px);
+    background: #fff;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .detail-panel.open {
+    width: 480px;
+    min-width: 480px;
+    overflow-y: auto;
+  }
+  .panel-inner { padding: 2rem; min-width: 480px; }
+  .panel-close { position: absolute; top: 1.25rem; right: 1.25rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-family: sans-serif; transition: all .15s; }
+  .panel-close:hover { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
+
+  .panel-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 12px; border-radius: 100px; margin-bottom: 1rem; }
+  .panel-title { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; line-height: 1.25; margin-bottom: .5rem; }
+  .panel-company { font-size: 16px; font-weight: 500; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+  .panel-meta { display: flex; flex-direction: column; gap: 8px; padding: 1.25rem; background: var(--bg); border-radius: 10px; margin-bottom: 1.5rem; }
+  .panel-meta-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .panel-meta-label { color: var(--text-muted); min-width: 80px; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+  .panel-meta-value { color: var(--text); font-weight: 500; }
+
+  .panel-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  .panel-section-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-bottom: .75rem; }
+  .panel-desc { font-size: 15px; line-height: 1.75; color: var(--text); white-space: pre-wrap; }
+  .panel-no-desc { font-size: 14px; color: var(--text-muted); font-style: italic; }
+
+  .panel-apply-btn { display: block; width: 100%; padding: 14px; background: #185FA5; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: center; margin-top: 2rem; transition: background .15s; }
+  .panel-apply-btn:hover { background: #0C447C; }
+
+  .panel-posted { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 1rem; }
+
+  /* Modals */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-start; justify-content: center; padding: 60px 1rem 2rem; backdrop-filter: blur(2px); }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 1.75rem; width: 500px; max-width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
+  .modal { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 1.75rem; width: 520px; max-width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
   .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 1.5rem; }
   .field { margin-bottom: 1rem; }
   .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
   .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); outline: none; transition: border-color .15s; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: #378ADD; }
-  .field textarea { resize: vertical; min-height: 80px; }
+  .field textarea { resize: vertical; min-height: 120px; }
+  .field .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
   .btn-primary { padding: 10px 22px; background: #185FA5; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background .15s; }
   .btn-primary:hover { background: #0C447C; }
@@ -99,7 +158,14 @@
   .login-error.visible { display: block; }
 
   footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: 12px; color: var(--text-muted); background: #fff; margin-top: 2rem; }
-  @media (max-width: 600px) { header, .hero, .filters, main { padding-left: 1rem; padding-right: 1rem; } }
+
+  @media (max-width: 800px) {
+    .detail-panel.open { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; min-width: 0 !important; z-index: 100; border-left: none; height: 100%; }
+    .panel-inner { min-width: 0; }
+    main.panel-open { max-width: 100%; }
+    header, .hero, .filters { padding-left: 1rem; padding-right: 1rem; }
+    main { padding: 1.25rem 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -133,7 +199,13 @@
   <button class="bubble" onclick="setFilter('IT',this)">IT/DATA</button>
 </div>
 
-<main id="main"></main>
+<div class="page-body">
+  <main id="main"></main>
+  <div class="detail-panel" id="detail-panel">
+    <div class="panel-inner" id="panel-inner"></div>
+  </div>
+</div>
+
 <footer>© Oslo Tekniker Samfund</footer>
 
 <!-- Login modal -->
@@ -202,8 +274,17 @@
       <input type="text" id="f-location" placeholder="f.eks. Oslo">
     </div>
     <div class="field">
-      <label>Beskrivelse</label>
-      <textarea id="f-desc" placeholder="Kort beskrivelse av stillingen..."></textarea>
+      <label>Søknadsfrist</label>
+      <input type="date" id="f-deadline">
+    </div>
+    <div class="field">
+      <label>Kontakt-epost</label>
+      <input type="email" id="f-email" placeholder="f.eks. jobb@bedrift.no">
+    </div>
+    <div class="field">
+      <label>Stillingsbeskrivelse</label>
+      <textarea id="f-desc" placeholder="Beskriv stillingen, arbeidsoppgaver, kvalifikasjoner osv..."></textarea>
+      <p class="hint">Tips: skriv gjerne flere avsnitt for en god annonse.</p>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeJobModal()">Avbryt</button>
@@ -231,19 +312,20 @@ let jobs = JSON.parse(localStorage.getItem('ots-jobs') || '[]');
 let nextId = parseInt(localStorage.getItem('ots-next-id') || '1');
 let activeFilter = 'all';
 let isAdmin = sessionStorage.getItem('ots-admin') === 'yes';
+let activeJobId = null;
 
 function persist() {
   localStorage.setItem('ots-jobs', JSON.stringify(jobs));
   localStorage.setItem('ots-next-id', String(nextId));
 }
 
+// ── Admin auth ──
 function applyAdminUI() {
   document.body.classList.toggle('is-admin', isAdmin);
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
   document.getElementById('login-btn').style.display = isAdmin ? 'none' : '';
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
 }
-
 function openLoginModal() {
   document.getElementById('pw-input').value = '';
   document.getElementById('login-error').classList.remove('visible');
@@ -251,28 +333,24 @@ function openLoginModal() {
   setTimeout(() => document.getElementById('pw-input').focus(), 100);
 }
 function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
-
 function doLogin() {
   if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
     isAdmin = true;
     sessionStorage.setItem('ots-admin', 'yes');
-    closeLoginModal();
-    applyAdminUI();
-    render();
+    closeLoginModal(); applyAdminUI(); render();
   } else {
     document.getElementById('login-error').classList.add('visible');
     document.getElementById('pw-input').value = '';
     document.getElementById('pw-input').focus();
   }
 }
-
 function logout() {
   isAdmin = false;
   sessionStorage.removeItem('ots-admin');
-  applyAdminUI();
-  render();
+  closePanel(); applyAdminUI(); render();
 }
 
+// ── Filters ──
 function setFilter(f, el) {
   activeFilter = f;
   document.querySelectorAll('.bubble').forEach(b => b.className = 'bubble');
@@ -280,9 +358,62 @@ function setFilter(f, el) {
   else if (f==='BE') el.classList.add('active-be');
   else if (f==='MEK') el.classList.add('active-mek');
   else if (f==='IT') el.classList.add('active-it');
+  closePanel();
   render();
 }
 
+// ── Detail panel ──
+function openPanel(jobId) {
+  const job = jobs.find(j => j.id === jobId);
+  if (!job) return;
+  activeJobId = jobId;
+
+  const sec = SECTIONS.find(s => s.id === job.section);
+  const gKey = GROUP_LABELS[sec.group];
+
+  const deadline = job.deadline ? new Date(job.deadline).toLocaleDateString('no-NO', { day:'numeric', month:'long', year:'numeric' }) : null;
+  const posted = job.posted ? new Date(job.posted).toLocaleDateString('no-NO', { day:'numeric', month:'long', year:'numeric' }) : null;
+
+  document.getElementById('panel-inner').innerHTML = `
+    <button class="panel-close" onclick="closePanel()">×</button>
+    <span class="panel-tag card-dept-tag ${sec.tagClass}">${job.dept}</span>
+    <div class="panel-title">${job.title}</div>
+    <div class="panel-company">${job.company || 'Ukjent bedrift'}</div>
+
+    <div class="panel-meta">
+      ${job.location ? `<div class="panel-meta-row"><span class="panel-meta-label">Sted</span><span class="panel-meta-value">📍 ${job.location}</span></div>` : ''}
+      <div class="panel-meta-row"><span class="panel-meta-label">Faggruppe</span><span class="panel-meta-value">${sec.label} (${gKey})</span></div>
+      ${deadline ? `<div class="panel-meta-row"><span class="panel-meta-label">Frist</span><span class="panel-meta-value">⏰ ${deadline}</span></div>` : ''}
+      ${job.email ? `<div class="panel-meta-row"><span class="panel-meta-label">Kontakt</span><span class="panel-meta-value"><a href="mailto:${job.email}" style="color:#185FA5;text-decoration:none">${job.email}</a></span></div>` : ''}
+    </div>
+
+    <hr class="panel-divider">
+    <div class="panel-section-label">Om stillingen</div>
+    ${job.desc
+      ? `<div class="panel-desc">${job.desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
+      : `<div class="panel-no-desc">Ingen beskrivelse er lagt til for denne stillingen.</div>`
+    }
+
+    ${job.email ? `<a href="mailto:${job.email}" class="panel-apply-btn">Søk på stillingen</a>` : '<button class="panel-apply-btn" onclick="alert(\'Ta kontakt med Oslo Tekniker Samfund for mer informasjon.\')">Ta kontakt</button>'}
+    ${posted ? `<div class="panel-posted">Lagt ut ${posted}</div>` : ''}
+  `;
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('main').classList.add('panel-open');
+
+  document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+  const activeCard = document.querySelector(`.job-card[data-id="${jobId}"]`);
+  if (activeCard) activeCard.classList.add('active');
+}
+
+function closePanel() {
+  activeJobId = null;
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('main').classList.remove('panel-open');
+  document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+}
+
+// ── Render ──
 function render() {
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -301,19 +432,22 @@ function render() {
       <div class="jobs-grid" id="grid-${sec.id}"></div>`;
     main.appendChild(section);
     const grid = section.querySelector(`#grid-${sec.id}`);
+
     if (secJobs.length === 0 && !isAdmin) {
       grid.innerHTML = `<div class="empty-state">Ingen ledige stillinger ennå</div>`;
     }
     secJobs.forEach(job => {
       const card = document.createElement('div');
-      card.className = 'job-card';
+      card.className = 'job-card' + (job.id === activeJobId ? ' active' : '');
+      card.dataset.id = job.id;
       card.innerHTML = `
-        <button class="job-delete" onclick="deleteJob(${job.id})" title="Fjern">×</button>
+        <button class="job-delete" onclick="event.stopPropagation();deleteJob(${job.id})" title="Fjern">×</button>
         <span class="card-dept-tag ${sec.tagClass}">${job.dept}</span>
         <div class="job-title">${job.title}</div>
         <div class="job-company">${job.company || ''}</div>
         <div class="job-location">${job.location ? '📍 ' + job.location : ''}</div>
-        ${job.desc ? `<div class="job-desc">${job.desc}</div>` : ''}`;
+        ${job.desc ? `<div class="job-snippet">${job.desc}</div>` : ''}`;
+      card.addEventListener('click', () => openPanel(job.id));
       grid.appendChild(card);
     });
     if (isAdmin) {
@@ -326,6 +460,7 @@ function render() {
   });
 }
 
+// ── Job modal ──
 function openJobModal(sectionId) {
   if (!isAdmin) return;
   if (sectionId) {
@@ -338,7 +473,7 @@ function openJobModal(sectionId) {
 }
 function closeJobModal() {
   document.getElementById('job-modal').classList.remove('open');
-  ['f-title','f-company','f-location','f-desc'].forEach(id => document.getElementById(id).value = '');
+  ['f-title','f-company','f-location','f-deadline','f-email','f-desc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-dept').value = '';
 }
 function saveJob() {
@@ -346,22 +481,26 @@ function saveJob() {
   const deptVal = document.getElementById('f-dept').value;
   if (!title || !deptVal) { alert('Stillingstittel og faggruppe er påkrevd.'); return; }
   const [dept, sectionId, groupKey] = deptVal.split('|');
-  jobs.push({ id: nextId++, title, dept, section: sectionId, group: groupKey,
+  jobs.push({
+    id: nextId++, title, dept, section: sectionId, group: groupKey,
     company: document.getElementById('f-company').value.trim(),
     location: document.getElementById('f-location').value.trim() || 'Oslo',
-    desc: document.getElementById('f-desc').value.trim() });
-  persist();
-  closeJobModal();
-  render();
+    deadline: document.getElementById('f-deadline').value,
+    email: document.getElementById('f-email').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    posted: new Date().toISOString().split('T')[0]
+  });
+  persist(); closeJobModal(); render();
 }
 function deleteJob(id) {
   if (!isAdmin) return;
   if (!confirm('Fjerne denne stillingen?')) return;
+  if (activeJobId === id) closePanel();
   jobs = jobs.filter(j => j.id !== id);
-  persist();
-  render();
+  persist(); render();
 }
 
+// close modals on backdrop click
 ['login-modal','job-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target === document.getElementById(id)) {
@@ -369,6 +508,8 @@ function deleteJob(id) {
     }
   });
 });
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePanel(); closeLoginModal(); closeJobModal(); } });
 
 applyAdminUI();
 render();
