@@ -1,0 +1,37 @@
+name: Delete Job
+
+on:
+  repository_dispatch:
+    types: [delete-job]
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Remove job from jobs.json
+        env:
+          JOB_ID: ${{ github.event.client_payload.id }}
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const id = parseInt(process.env.JOB_ID);
+          let jobs = [];
+          try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) {}
+          jobs = jobs.filter(j => j.id !== id);
+          fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
+          console.log('Deleted job id:', id);
+          EOF
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add jobs.json
+          git diff --staged --quiet || git commit -m "Delete job: ${{ github.event.client_payload.id }}"
+          git push
