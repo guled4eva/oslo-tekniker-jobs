@@ -33,32 +33,72 @@ jobs:
           const fs = require('fs');
 
           const payload = JSON.parse(process.env.JOB_PAYLOAD);
-          const { url, sections, id, posted } = payload;
+          const { url, id, posted, manualText } = payload;
 
           let pageText = '';
           try {
-            const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 10000 });
+            const res = await fetch(url, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'no,nb;q=0.9,en;q=0.8',
+              },
+              timeout: 12000
+            });
             const html = await res.text();
             const $ = cheerio(html);
-            $('script, style, nav, footer, header').remove();
-            pageText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 6000);
+            $('script, style, nav, footer, header, iframe, noscript').remove();
+            pageText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 8000);
           } catch (e) {
-            console.log('Could not fetch page, using URL only:', e.message);
+            console.log('Could not fetch page:', e.message);
           }
 
-          const prompt = `Extract job information from this job posting page content. Return ONLY valid JSON, nothing else.
+          const combinedText = [manualText, pageText].filter(Boolean).join('\n\n').slice(0, 8000);
 
-Page URL: ${url}
-Page content: ${pageText || 'Could not fetch page content'}
+          const allDepts = [
+            { dept: 'Konstruksjonsteknikk', section: 'bygg', group: 'be' },
+            { dept: 'By- og transportplanlegging', section: 'bygg', group: 'be' },
+            { dept: 'Vann- og miljøteknikk', section: 'bygg', group: 'be' },
+            { dept: 'Energi og miljø', section: 'energi', group: 'be' },
+            { dept: 'Mekatronikk', section: 'maskin', group: 'mek' },
+            { dept: 'Konstruksjon og design', section: 'maskin', group: 'mek' },
+            { dept: 'Automatisering og robotikk', section: 'elektro', group: 'mek' },
+            { dept: 'Elektronikk', section: 'elektro', group: 'mek' },
+            { dept: 'Bioteknologi', section: 'kjemi', group: 'mek' },
+            { dept: 'Kjemiingeniør', section: 'kjemi', group: 'mek' },
+            { dept: 'Anvendt datateknologi', section: 'it', group: 'it' },
+            { dept: 'Dataingeniør', section: 'it', group: 'it' },
+            { dept: 'Informasjonsteknologi', section: 'it', group: 'it' },
+            { dept: 'Matematisk modellering og datavitenskap – ingeniør', section: 'it', group: 'it' },
+          ];
 
-Return this exact JSON structure:
+          const deptList = allDepts.map(d => `- ${d.dept}`).join('\n');
+
+          const prompt = `You are helping categorize a Norwegian engineering job posting for Oslo Tekniker Samfund, a student engineering organization.
+
+Job URL: ${url}
+Job page content: ${combinedText || 'Could not fetch page - use the URL to make your best guess'}
+
+Available faggrupper (departments):
+${deptList}
+
+Extract all job information and determine which faggruppe(r) this job belongs to. A job can belong to multiple faggrupper if relevant.
+
+Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation:
 {
   "title": "job title",
   "company": "company name",
-  "location": "city or location",
+  "location": "city or location in Norway",
   "deadline": "YYYY-MM-DD or empty string if not found",
-  "description": "full job description, max 1000 words, preserve paragraph breaks with \\n\\n"
-}`;
+  "description": "full job description max 800 words, preserve paragraphs with \\n\\n",
+  "sections": ["exact dept name from list"]
+}
+
+Rules:
+- sections must contain ONLY exact names from the list above
+- Pick 1-3 most relevant departments
+- If unsure between two, include both
+- description should be in the same language as the job posting`;
 
           const geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -79,9 +119,18 @@ Return this exact JSON structure:
           let extracted = {};
           try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error:', e.message); }
 
-          // Load existing jobs
+          const resolvedSections = (extracted.sections || [])
+            .map(deptName => allDepts.find(d => d.dept === deptName))
+            .filter(Boolean)
+            .map(d => ({ dept: d.dept, section: d.section, group: d.group }));
+
+          if (resolvedSections.length === 0) {
+            resolvedSections.push({ dept: 'Dataingeniør', section: 'it', group: 'it' });
+          }
+
           let jobs = [];
           try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) {}
+          jobs = jobs.filter(j => j.id !== id);
 
           const newJob = {
             id,
@@ -90,14 +139,14 @@ Return this exact JSON structure:
             location: extracted.location || 'Oslo',
             deadline: extracted.deadline || '',
             desc: extracted.description || '',
-            sections,
+            sections: resolvedSections,
             url,
             posted
           };
 
           jobs.push(newJob);
           fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
-          console.log('Job saved:', newJob.title);
+          console.log('Saved:', newJob.title, '| Depts:', resolvedSections.map(s=>s.dept).join(', '));
           EOF
 
       - name: Commit jobs.json
