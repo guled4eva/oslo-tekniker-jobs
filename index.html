@@ -7,341 +7,99 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --blue-light: #E6F1FB;
-    --blue-mid: #378ADD;
-    --blue-dark: #0C447C;
-    --green-light: #EAF3DE;
-    --green-mid: #639922;
-    --green-dark: #3B6D11;
-    --purple-light: #EEEDFE;
-    --purple-mid: #7F77DD;
-    --purple-dark: #3C3489;
-    --teal-light: #E1F5EE;
-    --teal-mid: #1D9E75;
-    --teal-dark: #085041;
-    --coral-light: #FAECE7;
-    --coral-mid: #D85A30;
-    --coral-dark: #712B13;
-    --amber-light: #FAEEDA;
-    --amber-mid: #BA7517;
-    --amber-dark: #633806;
-    --bg: #F7F5F0;
-    --card: #ffffff;
-    --text: #1a1a18;
-    --text-muted: #6b6b67;
-    --border: rgba(0,0,0,0.1);
-    --border-hover: rgba(0,0,0,0.18);
+    --blue-light: #E6F1FB; --blue-mid: #378ADD; --blue-dark: #0C447C;
+    --green-light: #EAF3DE; --green-mid: #639922; --green-dark: #3B6D11;
+    --purple-light: #EEEDFE; --purple-mid: #7F77DD; --purple-dark: #3C3489;
+    --teal-light: #E1F5EE; --teal-mid: #1D9E75; --teal-dark: #085041;
+    --coral-light: #FAECE7; --coral-mid: #D85A30; --coral-dark: #712B13;
+    --amber-light: #FAEEDA; --amber-mid: #BA7517; --amber-dark: #633806;
+    --bg: #F7F5F0; --card: #ffffff; --text: #1a1a18; --text-muted: #6b6b67;
+    --border: rgba(0,0,0,0.1); --border-hover: rgba(0,0,0,0.18);
   }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  /* ── Header ── */
-  header {
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 68px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .logo-mark {
-    width: 40px;
-    height: 40px;
-    background: #0C447C;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #E6F1FB;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-  }
+  header { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 50; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-mark { width: 40px; height: 40px; background: #0C447C; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #E6F1FB; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; }
   .logo-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
   .logo-sub { font-size: 12px; color: var(--text-muted); margin-top: -2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .admin-badge { font-size: 12px; color: var(--green-dark); background: var(--green-light); padding: 4px 12px; border-radius: 100px; display: none; }
+  .admin-badge.visible { display: inline-block; }
+  .btn-ui { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--text-muted); transition: all .15s; }
+  .btn-ui:hover { background: var(--bg); color: var(--text); }
+  .btn-ui.admin-only { display: none; }
+  .btn-ui.add-main { background: #185FA5; color: #fff; border-color: #185FA5; }
+  .btn-ui.add-main:hover { background: #0C447C; border-color: #0C447C; }
+  .btn-ui.logout-btn { color: #b91c1c; }
 
-  .header-add-btn {
-    padding: 9px 20px;
-    background: #185FA5;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background .15s;
-  }
-  .header-add-btn:hover { background: #0C447C; }
-
-  /* ── Hero ── */
-  .hero {
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 2.5rem 2rem 2rem;
-  }
-  .hero h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    font-weight: 400;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
+  .hero { background: #fff; border-bottom: 1px solid var(--border); padding: 2.5rem 2rem 2rem; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: 32px; font-weight: 400; margin-bottom: 6px; }
   .hero p { color: var(--text-muted); font-size: 14px; }
 
-  /* ── Filters ── */
-  .filters {
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+  .filters { background: #fff; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .filter-label { font-size: 12px; color: var(--text-muted); margin-right: 4px; text-transform: uppercase; letter-spacing: .5px; }
-
-  .bubble {
-    padding: 6px 16px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    background: #fff;
-    color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
-    transition: all .15s;
-  }
+  .bubble { padding: 6px 16px; border-radius: 100px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; color: var(--text-muted); font-family: 'DM Sans', sans-serif; transition: all .15s; }
   .bubble:hover { border-color: var(--border-hover); color: var(--text); }
   .bubble.active-all { background: var(--text); color: #fff; border-color: var(--text); }
   .bubble.active-be { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue-dark); }
   .bubble.active-mek { background: var(--green-light); border-color: var(--green-mid); color: var(--green-dark); }
   .bubble.active-it { background: var(--purple-light); border-color: var(--purple-mid); color: var(--purple-dark); }
 
-  /* ── Main ── */
   main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-
   .section { margin-bottom: 2.5rem; }
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1rem;
-  }
-  .section-super {
-    padding: 3px 12px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-  }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .section-super { padding: 3px 12px; border-radius: 100px; font-size: 11px; font-weight: 500; letter-spacing: .5px; text-transform: uppercase; }
   .super-be { background: var(--blue-light); color: var(--blue-dark); }
   .super-mek { background: var(--green-light); color: var(--green-dark); }
   .super-it { background: var(--purple-light); color: var(--purple-dark); }
+  .section-name { font-size: 16px; font-weight: 500; }
+  .section-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
 
-  .section-name {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text);
-  }
-  .section-count {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-left: auto;
-  }
-
-  .jobs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-  }
-
-  .job-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    position: relative;
-    transition: border-color .15s, box-shadow .15s;
-  }
+  .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .job-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; transition: border-color .15s, box-shadow .15s; }
   .job-card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-
-  .card-dept-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 10px;
-    border-radius: 100px;
-    margin-bottom: 8px;
-  }
+  .card-dept-tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 100px; margin-bottom: 8px; }
   .tag-bygg { background: var(--blue-light); color: var(--blue-dark); }
   .tag-energi { background: var(--teal-light); color: var(--teal-dark); }
   .tag-maskin { background: var(--green-light); color: var(--green-dark); }
   .tag-elektro { background: var(--purple-light); color: var(--purple-dark); }
   .tag-kjemi { background: var(--coral-light); color: var(--coral-dark); }
   .tag-it { background: var(--amber-light); color: var(--amber-dark); }
-
-  .job-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .job-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
   .job-company { font-size: 13px; color: var(--text-muted); }
   .job-location { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .job-desc { font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 8px; }
-
-  .job-delete {
-    position: absolute;
-    top: 10px; right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 18px;
-    line-height: 1;
-    padding: 2px 6px;
-    border-radius: 6px;
-    opacity: 0;
-    transition: opacity .15s;
-    font-family: sans-serif;
-  }
+  .job-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; opacity: 0; transition: opacity .15s; font-family: sans-serif; display: none; }
   .job-card:hover .job-delete { opacity: 1; }
   .job-delete:hover { background: #fef2f2; color: #b91c1c; }
-
-  .add-card {
-    background: none;
-    border: 1.5px dashed var(--border);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
-    transition: all .15s;
-    text-align: left;
-    width: 100%;
-  }
+  body.is-admin .job-delete { display: block; }
+  .add-card { background: none; border: 1.5px dashed var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; cursor: pointer; display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); font-family: 'DM Sans', sans-serif; transition: all .15s; width: 100%; }
   .add-card:hover { border-color: var(--border-hover); color: var(--text); background: rgba(0,0,0,.02); }
-  .add-icon { font-size: 20px; line-height: 1; }
+  body.is-admin .add-card { display: flex; }
+  .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; grid-column: 1/-1; }
 
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted);
-    font-size: 13px;
-    border: 1px dashed var(--border);
-    border-radius: 12px;
-    grid-column: 1/-1;
-  }
-
-  /* ── Modal ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.4);
-    z-index: 200;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 60px 1rem 2rem;
-    backdrop-filter: blur(2px);
-  }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-start; justify-content: center; padding: 60px 1rem 2rem; backdrop-filter: blur(2px); }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 1.75rem;
-    width: 500px;
-    max-width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 8px 40px rgba(0,0,0,.12);
-  }
+  .modal { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 1.75rem; width: 500px; max-width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
   .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 1.5rem; }
-
   .field { margin-bottom: 1rem; }
   .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-  .field input, .field select, .field textarea {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: #fff;
-    color: var(--text);
-    outline: none;
-    transition: border-color .15s;
-  }
+  .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); outline: none; transition: border-color .15s; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: #378ADD; }
   .field textarea { resize: vertical; min-height: 80px; }
-
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
-  .btn-primary {
-    padding: 10px 22px;
-    background: #185FA5;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s;
-  }
+  .btn-primary { padding: 10px 22px; background: #185FA5; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background .15s; }
   .btn-primary:hover { background: #0C447C; }
-  .btn-cancel {
-    padding: 10px 22px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    color: var(--text);
-    transition: background .15s;
-  }
+  .btn-cancel { padding: 10px 22px; background: none; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text); }
   .btn-cancel:hover { background: var(--bg); }
+  .login-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+  .login-error { font-size: 13px; color: #b91c1c; margin-top: 8px; display: none; }
+  .login-error.visible { display: block; }
 
-  /* ── Footer ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 1.5rem 2rem;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-muted);
-    background: #fff;
-    margin-top: 2rem;
-  }
-
-  @media (max-width: 600px) {
-    header { padding: 0 1rem; }
-    .hero { padding: 1.5rem 1rem 1rem; }
-    .filters { padding: .75rem 1rem; }
-    main { padding: 1.25rem 1rem; }
-  }
+  footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: 12px; color: var(--text-muted); background: #fff; margin-top: 2rem; }
+  @media (max-width: 600px) { header, .hero, .filters, main { padding-left: 1rem; padding-right: 1rem; } }
 </style>
 </head>
 <body>
@@ -354,7 +112,12 @@
       <div class="logo-sub">Stillingsportal</div>
     </div>
   </div>
-  <button class="header-add-btn" onclick="openModal(null)">+ Legg til stilling</button>
+  <div class="header-right">
+    <span class="admin-badge" id="admin-badge">Admin</span>
+    <button class="btn-ui add-main admin-only" onclick="openJobModal(null)">+ Legg til stilling</button>
+    <button class="btn-ui logout-btn admin-only" onclick="logout()">Logg ut</button>
+    <button class="btn-ui" id="login-btn" onclick="openLoginModal()">Admin</button>
+  </div>
 </header>
 
 <div class="hero">
@@ -371,11 +134,27 @@
 </div>
 
 <main id="main"></main>
-
 <footer>© Oslo Tekniker Samfund</footer>
 
-<!-- Modal -->
-<div class="modal-overlay" id="modal">
+<!-- Login modal -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal" style="max-width:360px">
+    <h2>Admin-innlogging</h2>
+    <p class="login-hint">Kun for administratorer av stillingsportalen.</p>
+    <div class="field">
+      <label>Passord</label>
+      <input type="password" id="pw-input" placeholder="Skriv inn passord" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <p class="login-error" id="login-error">Feil passord. Prøv igjen.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeLoginModal()">Avbryt</button>
+      <button class="btn-primary" onclick="doLogin()">Logg inn</button>
+    </div>
+  </div>
+</div>
+
+<!-- Job modal -->
+<div class="modal-overlay" id="job-modal">
   <div class="modal">
     <h2>Legg til ny stilling</h2>
     <div class="field">
@@ -387,7 +166,7 @@
       <select id="f-dept">
         <option value="">— velg faggruppe —</option>
         <optgroup label="BYGG (BE)">
-          <option value="Konstruksjon|bygg|be">Konstruksjonsteknikk</option>
+          <option value="Konstruksjonsteknikk|bygg|be">Konstruksjonsteknikk</option>
           <option value="By- og transportplanlegging|bygg|be">By- og transportplanlegging</option>
           <option value="Vann- og miljøteknikk|bygg|be">Vann- og miljøteknikk</option>
         </optgroup>
@@ -410,7 +189,7 @@
           <option value="Anvendt datateknologi|it|it">Anvendt datateknologi</option>
           <option value="Dataingeniør|it|it">Dataingeniør</option>
           <option value="Informasjonsteknologi|it|it">Informasjonsteknologi</option>
-          <option value="Matematisk modellering og datavitenskap|it|it">Matematisk modellering og datavitenskap – ingeniør</option>
+          <option value="Matematisk modellering og datavitenskap – ingeniør|it|it">Matematisk modellering og datavitenskap – ingeniør</option>
         </optgroup>
       </select>
     </div>
@@ -427,43 +206,80 @@
       <textarea id="f-desc" placeholder="Kort beskrivelse av stillingen..."></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Avbryt</button>
+      <button class="btn-cancel" onclick="closeJobModal()">Avbryt</button>
       <button class="btn-primary" onclick="saveJob()">Legg til stilling</button>
     </div>
   </div>
 </div>
 
 <script>
-const SECTIONS = [
-  { id:'bygg',   group:'be',  label:'BYGG',        superClass:'super-be',  tagClass:'tag-bygg',   depts:['Konstruksjon','By- og transportplanlegging','Vann- og miljøteknikk'] },
-  { id:'energi', group:'be',  label:'ENERGI/MILJØ', superClass:'super-be',  tagClass:'tag-energi', depts:['Energi og miljø'] },
-  { id:'maskin', group:'mek', label:'MASKIN',       superClass:'super-mek', tagClass:'tag-maskin', depts:['Mekatronikk','Konstruksjon og design'] },
-  { id:'elektro',group:'mek', label:'ELEKTRO',      superClass:'super-mek', tagClass:'tag-elektro',depts:['Automatisering og robotikk','Elektronikk'] },
-  { id:'kjemi',  group:'mek', label:'KJEMI',        superClass:'super-mek', tagClass:'tag-kjemi',  depts:['Bioteknologi','Kjemiingeniør'] },
-  { id:'it',     group:'it',  label:'IT/DATA',      superClass:'super-it',  tagClass:'tag-it',     depts:['Anvendt datateknologi','Dataingeniør','Informasjonsteknologi','Matematisk modellering og datavitenskap'] },
-];
+// ── SET YOUR PASSWORD HERE ────────────────────────────
+const ADMIN_PASSWORD = 'ots-admin-2024';
+// ─────────────────────────────────────────────────────
 
+const SECTIONS = [
+  { id:'bygg',   group:'be',  label:'BYGG',         superClass:'super-be',  tagClass:'tag-bygg' },
+  { id:'energi', group:'be',  label:'ENERGI/MILJØ',  superClass:'super-be',  tagClass:'tag-energi' },
+  { id:'maskin', group:'mek', label:'MASKIN',        superClass:'super-mek', tagClass:'tag-maskin' },
+  { id:'elektro',group:'mek', label:'ELEKTRO',       superClass:'super-mek', tagClass:'tag-elektro' },
+  { id:'kjemi',  group:'mek', label:'KJEMI',         superClass:'super-mek', tagClass:'tag-kjemi' },
+  { id:'it',     group:'it',  label:'IT/DATA',       superClass:'super-it',  tagClass:'tag-it' },
+];
 const GROUP_LABELS = { be:'BE', mek:'MEK', it:'IT/DATA' };
 
 let jobs = JSON.parse(localStorage.getItem('ots-jobs') || '[]');
 let nextId = parseInt(localStorage.getItem('ots-next-id') || '1');
 let activeFilter = 'all';
-let pendingSection = null;
+let isAdmin = sessionStorage.getItem('ots-admin') === 'yes';
 
-function save() {
+function persist() {
   localStorage.setItem('ots-jobs', JSON.stringify(jobs));
-  localStorage.setItem('ots-next-id', nextId);
+  localStorage.setItem('ots-next-id', String(nextId));
+}
+
+function applyAdminUI() {
+  document.body.classList.toggle('is-admin', isAdmin);
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.getElementById('login-btn').style.display = isAdmin ? 'none' : '';
+  document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
+}
+
+function openLoginModal() {
+  document.getElementById('pw-input').value = '';
+  document.getElementById('login-error').classList.remove('visible');
+  document.getElementById('login-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
+
+function doLogin() {
+  if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+    isAdmin = true;
+    sessionStorage.setItem('ots-admin', 'yes');
+    closeLoginModal();
+    applyAdminUI();
+    render();
+  } else {
+    document.getElementById('login-error').classList.add('visible');
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function logout() {
+  isAdmin = false;
+  sessionStorage.removeItem('ots-admin');
+  applyAdminUI();
+  render();
 }
 
 function setFilter(f, el) {
   activeFilter = f;
-  document.querySelectorAll('.bubble').forEach(b => {
-    b.className = 'bubble';
-  });
-  if (f === 'all') el.classList.add('active-all');
-  else if (f === 'BE') el.classList.add('active-be');
-  else if (f === 'MEK') el.classList.add('active-mek');
-  else if (f === 'IT') el.classList.add('active-it');
+  document.querySelectorAll('.bubble').forEach(b => b.className = 'bubble');
+  if (f==='all') el.classList.add('active-all');
+  else if (f==='BE') el.classList.add('active-be');
+  else if (f==='MEK') el.classList.add('active-mek');
+  else if (f==='IT') el.classList.add('active-it');
   render();
 }
 
@@ -485,82 +301,76 @@ function render() {
       <div class="jobs-grid" id="grid-${sec.id}"></div>`;
     main.appendChild(section);
     const grid = section.querySelector(`#grid-${sec.id}`);
-    if (secJobs.length === 0) {
+    if (secJobs.length === 0 && !isAdmin) {
       grid.innerHTML = `<div class="empty-state">Ingen ledige stillinger ennå</div>`;
-    } else {
-      secJobs.forEach(job => {
-        const card = document.createElement('div');
-        card.className = 'job-card';
-        card.innerHTML = `
-          <button class="job-delete" onclick="deleteJob(${job.id})" title="Fjern">×</button>
-          <span class="card-dept-tag ${sec.tagClass}">${job.dept}</span>
-          <div class="job-title">${job.title}</div>
-          <div class="job-company">${job.company || ''}</div>
-          <div class="job-location">${job.location ? '📍 ' + job.location : ''}</div>
-          ${job.desc ? `<div class="job-desc">${job.desc}</div>` : ''}`;
-        grid.appendChild(card);
-      });
     }
-    const addCard = document.createElement('button');
-    addCard.className = 'add-card';
-    addCard.innerHTML = `<span class="add-icon">+</span> Legg til i ${sec.label}`;
-    addCard.onclick = () => openModal(sec.id);
-    grid.appendChild(addCard);
+    secJobs.forEach(job => {
+      const card = document.createElement('div');
+      card.className = 'job-card';
+      card.innerHTML = `
+        <button class="job-delete" onclick="deleteJob(${job.id})" title="Fjern">×</button>
+        <span class="card-dept-tag ${sec.tagClass}">${job.dept}</span>
+        <div class="job-title">${job.title}</div>
+        <div class="job-company">${job.company || ''}</div>
+        <div class="job-location">${job.location ? '📍 ' + job.location : ''}</div>
+        ${job.desc ? `<div class="job-desc">${job.desc}</div>` : ''}`;
+      grid.appendChild(card);
+    });
+    if (isAdmin) {
+      const addCard = document.createElement('button');
+      addCard.className = 'add-card';
+      addCard.innerHTML = `<span style="font-size:20px;line-height:1">+</span> Legg til i ${sec.label}`;
+      addCard.onclick = () => openJobModal(sec.id);
+      grid.appendChild(addCard);
+    }
   });
 }
 
-function openModal(sectionId) {
-  pendingSection = sectionId;
+function openJobModal(sectionId) {
+  if (!isAdmin) return;
   if (sectionId) {
-    const sec = SECTIONS.find(s => s.id === sectionId);
-    if (sec) {
-      const sel = document.getElementById('f-dept');
-      for (let o of sel.options) {
-        if (o.value && o.value.split('|')[1] === sec.id) { sel.value = o.value; break; }
-      }
+    const sel = document.getElementById('f-dept');
+    for (let o of sel.options) {
+      if (o.value && o.value.split('|')[1] === sectionId) { sel.value = o.value; break; }
     }
   }
-  document.getElementById('modal').classList.add('open');
+  document.getElementById('job-modal').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
+function closeJobModal() {
+  document.getElementById('job-modal').classList.remove('open');
   ['f-title','f-company','f-location','f-desc'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-dept').value = '';
-  pendingSection = null;
 }
-
 function saveJob() {
   const title = document.getElementById('f-title').value.trim();
   const deptVal = document.getElementById('f-dept').value;
   if (!title || !deptVal) { alert('Stillingstittel og faggruppe er påkrevd.'); return; }
   const [dept, sectionId, groupKey] = deptVal.split('|');
-  jobs.push({
-    id: nextId++,
-    title,
-    dept,
-    section: sectionId,
-    group: groupKey,
+  jobs.push({ id: nextId++, title, dept, section: sectionId, group: groupKey,
     company: document.getElementById('f-company').value.trim(),
     location: document.getElementById('f-location').value.trim() || 'Oslo',
-    desc: document.getElementById('f-desc').value.trim()
-  });
-  save();
-  closeModal();
+    desc: document.getElementById('f-desc').value.trim() });
+  persist();
+  closeJobModal();
   render();
 }
-
 function deleteJob(id) {
+  if (!isAdmin) return;
   if (!confirm('Fjerne denne stillingen?')) return;
   jobs = jobs.filter(j => j.id !== id);
-  save();
+  persist();
   render();
 }
 
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) closeModal();
+['login-modal','job-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) {
+      id === 'login-modal' ? closeLoginModal() : closeJobModal();
+    }
+  });
 });
 
+applyAdminUI();
 render();
 </script>
 </body>
