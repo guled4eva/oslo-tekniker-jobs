@@ -317,7 +317,7 @@ function showToast(msg, isError) {
 // ── Auth ──
 function applyAdminUI() {
   document.body.classList.toggle('is-admin', isAdmin);
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
   document.getElementById('login-btn').style.display = isAdmin ? 'none' : '';
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
 }
