@@ -1,0 +1,41 @@
+name: Edit Job
+
+on:
+  repository_dispatch:
+    types: [edit-job]
+
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Update job in jobs.json
+        env:
+          JOB_PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const payload = JSON.parse(process.env.JOB_PAYLOAD);
+          const { id, updates } = payload;
+          let jobs = [];
+          try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) {}
+          const idx = jobs.findIndex(j => j.id === id);
+          if (idx !== -1) {
+            jobs[idx] = { ...jobs[idx], ...updates };
+            console.log('Updated job:', jobs[idx].title);
+          }
+          fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
+          EOF
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add jobs.json
+          git diff --staged --quiet || git commit -m "Edit job: ${{ github.event.client_payload.id }}"
+          git push
