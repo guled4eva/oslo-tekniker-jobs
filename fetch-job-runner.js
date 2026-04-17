@@ -3,8 +3,18 @@ const fs = require('fs');
 async function main() {
   const fetch = (await import('node-fetch')).default;
 
-  const payload = JSON.parse(process.env.JOB_PAYLOAD);
-  const { url, jobText, id, posted } = payload;
+  // Read the pending job file written by the website
+  let pending = {};
+  try {
+    pending = JSON.parse(fs.readFileSync('pending-job.json', 'utf8'));
+  } catch(e) {
+    console.log('Could not read pending-job.json:', e.message);
+    process.exit(1);
+  }
+
+  const { url, jobText, id, posted } = pending;
+  console.log('Processing job ID:', id);
+  console.log('Job text length:', (jobText || '').length);
 
   const allDepts = [
     { dept: 'Konstruksjonsteknikk', section: 'bygg', group: 'be' },
@@ -25,8 +35,8 @@ async function main() {
 
   const deptList = allDepts.map(d => '- ' + d.dept).join('\n');
 
-  const prompt = [
-    'You are helping categorize a Norwegian engineering job posting for Oslo Tekniker Samfund.',
+  const promptParts = [
+    'You are helping categorize a Norwegian engineering job posting for Oslo Tekniker Samfund, a student engineering organization.',
     '',
     'Job posting text:',
     jobText || '(no text provided)',
@@ -44,16 +54,20 @@ async function main() {
     '  "company": "company name",',
     '  "location": "city or municipality in Norway",',
     '  "deadline": "YYYY-MM-DD or empty string if not found",',
-    '  "description": "clean job description max 600 words, preserve paragraphs with \\n\\n",',
+    '  "description": "clean job description max 600 words, preserve paragraphs with \\n\\n, remove irrelevant UI text",',
     '  "sections": ["exact dept name from list above"]',
     '}',
     '',
     'Rules:',
-    '- sections must contain ONLY exact names from the list',
-    '- Pick 1-3 most relevant departments',
+    '- sections must contain ONLY exact names from the list above',
+    '- Pick 1-3 most relevant departments based on job content',
     '- deadline must be YYYY-MM-DD format or empty string',
-  ].join('\n');
+    '- Keep description clean, remove navigation/cookie/footer text',
+  ];
 
+  const prompt = promptParts.join('\n');
+
+  console.log('Calling Gemini...');
   const geminiRes = await fetch(
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + process.env.GEMINI_API_KEY,
     {
@@ -66,15 +80,27 @@ async function main() {
     }
   );
 
+  console.log('Gemini HTTP status:', geminiRes.status);
   const geminiData = await geminiRes.json();
-  console.log('Gemini status:', geminiRes.status);
+
+  if (geminiData.error) {
+    console.log('Gemini error:', JSON.stringify(geminiData.error));
+    process.exit(1);
+  }
 
   const raw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  console.log('Gemini raw response:', raw.slice(0, 500));
+
   const clean = raw.replace(/```json|```/g, '').trim();
-  console.log('Gemini response:', clean);
 
   let extracted = {};
-  try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error:', e.message); }
+  try {
+    extracted = JSON.parse(clean);
+    console.log('Parsed successfully:', extracted.title);
+  } catch(e) {
+    console.log('JSON parse error:', e.message);
+    console.log('Full raw:', raw);
+  }
 
   const resolvedSections = (extracted.sections || [])
     .map(deptName => allDepts.find(d => d.dept === deptName))
@@ -82,12 +108,17 @@ async function main() {
     .map(d => ({ dept: d.dept, section: d.section, group: d.group }));
 
   if (resolvedSections.length === 0) {
-    console.log('No sections matched, defaulting to Vann- og miljøteknikk');
-    resolvedSections.push({ dept: 'Vann- og miljøteknikk', section: 'bygg', group: 'be' });
+    console.log('No sections matched from:', extracted.sections);
   }
 
   let jobs = [];
-  try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) { console.log('jobs.json not found, starting fresh'); }
+  try {
+    jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8'));
+  } catch(e) {
+    console.log('Starting with empty jobs.json');
+  }
+
+  // Remove any pending placeholder with same id
   jobs = jobs.filter(j => j.id !== id);
 
   const newJob = {
@@ -97,14 +128,14 @@ async function main() {
     location: extracted.location || 'Norge',
     deadline: extracted.deadline || '',
     desc: extracted.description || '',
-    sections: resolvedSections,
+    sections: resolvedSections.length > 0 ? resolvedSections : [{ dept: 'Vann- og miljøteknikk', section: 'bygg', group: 'be' }],
     url: url || '',
     posted
   };
 
   jobs.push(newJob);
   fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
-  console.log('Saved:', newJob.title, '| Depts:', resolvedSections.map(s => s.dept).join(', '));
+  console.log('Saved:', newJob.title, '| Depts:', newJob.sections.map(s => s.dept).join(', '));
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch(e => { console.error('Fatal error:', e); process.exit(1); });
