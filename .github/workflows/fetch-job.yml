@@ -20,40 +20,19 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install node-fetch cheerio
+        run: npm install node-fetch
 
-      - name: Fetch and parse job
+      - name: Parse job with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           JOB_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
           node << 'EOF'
           const fetch = (await import('node-fetch')).default;
-          const cheerio = (await import('cheerio')).load;
           const fs = require('fs');
 
           const payload = JSON.parse(process.env.JOB_PAYLOAD);
-          const { url, id, posted, manualText } = payload;
-
-          let pageText = '';
-          try {
-            const res = await fetch(url, {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'no,nb;q=0.9,en;q=0.8',
-              },
-              timeout: 12000
-            });
-            const html = await res.text();
-            const $ = cheerio(html);
-            $('script, style, nav, footer, header, iframe, noscript').remove();
-            pageText = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 8000);
-          } catch (e) {
-            console.log('Could not fetch page:', e.message);
-          }
-
-          const combinedText = [manualText, pageText].filter(Boolean).join('\n\n').slice(0, 8000);
+          const { url, jobText, id, posted } = payload;
 
           const allDepts = [
             { dept: 'Konstruksjonsteknikk', section: 'bygg', group: 'be' },
@@ -76,29 +55,31 @@ jobs:
 
           const prompt = `You are helping categorize a Norwegian engineering job posting for Oslo Tekniker Samfund, a student engineering organization.
 
-Job URL: ${url}
-Job page content: ${combinedText || 'Could not fetch page - use the URL to make your best guess'}
+Job posting text:
+${jobText}
+
+${url ? `Original URL: ${url}` : ''}
 
 Available faggrupper (departments):
 ${deptList}
 
-Extract all job information and determine which faggruppe(r) this job belongs to. A job can belong to multiple faggrupper if relevant.
+Extract all job information and determine which faggruppe(r) this job belongs to.
 
-Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation:
+Return ONLY valid JSON, no markdown, no code blocks, no explanation:
 {
   "title": "job title",
   "company": "company name",
-  "location": "city or location in Norway",
+  "location": "city or municipality in Norway",
   "deadline": "YYYY-MM-DD or empty string if not found",
-  "description": "full job description max 800 words, preserve paragraphs with \\n\\n",
-  "sections": ["exact dept name from list"]
+  "description": "clean job description max 600 words, preserve paragraphs with \\n\\n, remove irrelevant site UI text",
+  "sections": ["exact dept name from list above"]
 }
 
 Rules:
-- sections must contain ONLY exact names from the list above
-- Pick 1-3 most relevant departments
-- If unsure between two, include both
-- description should be in the same language as the job posting`;
+- sections must contain ONLY exact names from the list
+- Pick 1-3 most relevant departments based on the job content
+- deadline must be in YYYY-MM-DD format or empty string
+- Keep description clean and relevant, skip navigation/footer/cookie text`;
 
           const geminiRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -117,7 +98,10 @@ Rules:
           const clean = raw.replace(/```json|```/g, '').trim();
 
           let extracted = {};
-          try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error:', e.message); }
+          try { extracted = JSON.parse(clean); } catch(e) {
+            console.log('Parse error:', e.message);
+            console.log('Raw response:', raw);
+          }
 
           const resolvedSections = (extracted.sections || [])
             .map(deptName => allDepts.find(d => d.dept === deptName))
@@ -125,6 +109,7 @@ Rules:
             .map(d => ({ dept: d.dept, section: d.section, group: d.group }));
 
           if (resolvedSections.length === 0) {
+            console.log('No sections matched, defaulting');
             resolvedSections.push({ dept: 'Dataingeniør', section: 'it', group: 'it' });
           }
 
@@ -136,11 +121,11 @@ Rules:
             id,
             title: extracted.title || 'Ukjent stilling',
             company: extracted.company || '',
-            location: extracted.location || 'Oslo',
+            location: extracted.location || 'Norge',
             deadline: extracted.deadline || '',
             desc: extracted.description || '',
             sections: resolvedSections,
-            url,
+            url: url || '',
             posted
           };
 
