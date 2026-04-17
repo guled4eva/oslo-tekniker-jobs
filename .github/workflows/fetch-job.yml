@@ -1,8 +1,9 @@
 name: Fetch Job from URL
 
 on:
-  repository_dispatch:
-    types: [fetch-job]
+  push:
+    paths:
+      - 'pending-job.json'
 
 jobs:
   fetch:
@@ -25,13 +26,14 @@ jobs:
       - name: Parse job with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          JOB_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: node fetch-job-runner.js
 
-      - name: Commit jobs.json
+      - name: Commit results
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+          git pull --rebase
+          git rm --ignore-unmatch pending-job.json
           git add jobs.json
-          git diff --staged --quiet || git commit -m "Add job: ${{ github.event.client_payload.id }}"
+          git diff --staged --quiet || git commit -m "Add job from pending-job.json"
           git push
