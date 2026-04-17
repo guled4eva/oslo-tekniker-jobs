@@ -19,7 +19,6 @@
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
 
-  /* ── Header ── */
   header { background: #fff; border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 50; }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-mark { width: 40px; height: 40px; background: #0C447C; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #E6F1FB; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; }
@@ -28,27 +27,21 @@
   .header-right { display: flex; align-items: center; gap: 8px; }
   .admin-badge { font-size: 12px; color: var(--green-dark); background: var(--green-light); padding: 4px 12px; border-radius: 100px; display: none; }
   .admin-badge.visible { display: inline-block; }
-
-  /* Preview banner */
   .preview-banner { display: none; background: var(--amber-light); border-bottom: 1px solid var(--amber-mid); padding: 8px 2rem; font-size: 13px; color: var(--amber-dark); text-align: center; }
   .preview-banner.visible { display: block; }
   .preview-banner button { background: var(--amber-dark); color: #fff; border: none; border-radius: 6px; padding: 4px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-left: 12px; }
-
   .btn-ui { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--text-muted); transition: all .15s; white-space: nowrap; }
   .btn-ui:hover { background: var(--bg); color: var(--text); }
   .btn-ui.admin-only { display: none; }
   .btn-ui.add-main { background: #185FA5; color: #fff; border-color: #185FA5; }
   .btn-ui.add-main:hover { background: #0C447C; }
   .btn-ui.preview-btn { background: var(--amber-light); color: var(--amber-dark); border-color: var(--amber-mid); }
-  .btn-ui.preview-btn:hover { background: #f0e0c0; }
   .btn-ui.logout-btn { color: #b91c1c; }
 
-  /* ── Hero ── */
   .hero { background: #fff; border-bottom: 1px solid var(--border); padding: 2.5rem 2rem 2rem; }
   .hero h1 { font-family: 'DM Serif Display', serif; font-size: 32px; font-weight: 400; margin-bottom: 6px; }
   .hero p { color: var(--text-muted); font-size: 14px; }
 
-  /* ── Filters ── */
   .filter-bar { background: #fff; border-bottom: 1px solid var(--border); }
   .filter-row { padding: .75rem 2rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .filter-row + .filter-row { padding-top: 0; border-top: 1px solid var(--border); }
@@ -74,7 +67,6 @@
   .clear-sub:hover { background: var(--blue-light); }
   .clear-sub.visible { display: inline-block; }
 
-  /* ── Layout ── */
   .page-body { display: flex; align-items: flex-start; }
   main { flex: 1; padding: 2rem; min-width: 0; transition: max-width .3s ease; }
   main.panel-open { max-width: 520px; }
@@ -89,7 +81,6 @@
   .section-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
   .section-sub-bubbles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
 
-  /* ── Job cards ── */
   .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
   .job-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; transition: border-color .15s, box-shadow .15s; cursor: pointer; }
   .job-card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px rgba(0,0,0,.07); }
@@ -116,7 +107,6 @@
   body.is-admin:not(.is-preview) .add-card { display: flex; }
   .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; grid-column: 1/-1; }
 
-  /* ── Detail panel ── */
   .detail-panel { width: 0; min-width: 0; overflow: hidden; transition: width .3s ease, min-width .3s ease; position: sticky; top: 68px; height: calc(100vh - 68px); background: #fff; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
   .detail-panel.open { width: 480px; min-width: 480px; overflow-y: auto; }
   .panel-inner { padding: 2rem; min-width: 480px; }
@@ -141,21 +131,19 @@
   .panel-apply-btn:hover { background: #0C447C; }
   .panel-posted { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 1rem; }
 
-  /* ── Modals ── */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-start; justify-content: center; padding: 60px 1rem 2rem; backdrop-filter: blur(2px); }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 1.75rem; width: 560px; max-width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
+  .modal { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 1.75rem; width: 580px; max-width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
   .modal h2 { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 400; margin-bottom: .4rem; }
   .modal-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
   .field { margin-bottom: 1rem; }
   .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-  .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); outline: none; transition: border-color .15s; }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: #378ADD; }
-  .field textarea { resize: vertical; min-height: 120px; }
+  .field input, .field textarea { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); outline: none; transition: border-color .15s; }
+  .field input:focus, .field textarea:focus { border-color: #378ADD; }
+  .field textarea { resize: vertical; }
   .field .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
   .field-optional { font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
 
-  /* Dept pills */
   .dept-grid { display: flex; flex-direction: column; gap: 12px; }
   .dept-group-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-bottom: 5px; }
   .dept-options { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -179,7 +167,6 @@
   .login-error { font-size: 13px; color: #b91c1c; margin-top: 8px; display: none; }
   .login-error.visible { display: block; }
 
-  /* Toast */
   .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a18; color: #fff; padding: 12px 22px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all .3s; pointer-events: none; z-index: 300; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.error { background: #b91c1c; }
@@ -211,7 +198,7 @@
   </div>
   <div class="header-right">
     <span class="admin-badge" id="admin-badge">Admin</span>
-    <button class="btn-ui preview-btn admin-only" id="preview-btn" onclick="enterPreview()">👁 Forhåndsvis</button>
+    <button class="btn-ui preview-btn admin-only" onclick="enterPreview()">👁 Forhåndsvis</button>
     <button class="btn-ui add-main admin-only" onclick="openAddModal()">+ Legg til stilling</button>
     <button class="btn-ui logout-btn admin-only" onclick="logout()">Logg ut</button>
     <button class="btn-ui" id="login-btn" onclick="openLoginModal()">Admin</button>
@@ -274,19 +261,19 @@
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
     <h2>Legg til ny stilling</h2>
-    <p class="modal-subtitle">Lim inn en URL — AI henter og kategoriserer automatisk. Du kan redigere etterpå.</p>
+    <p class="modal-subtitle">Lim inn stillingsteksten — AI kategoriserer og rydder opp automatisk.</p>
     <div class="field">
-      <label>URL til stillingsannonse *</label>
-      <input type="url" id="f-url" placeholder="https://www.finn.no/job/... eller annen jobbside">
-      <p class="hint">Fungerer best med LinkedIn og bedriftenes egne nettsider. For finn.no, lim også inn teksten nedenfor.</p>
+      <label>Stillingstekst *</label>
+      <textarea id="f-jobtext" placeholder="Lim inn hele stillingsannonsen her — fra finn.no, LinkedIn eller andre jobbsider. Jo mer tekst, jo bedre resultat." style="min-height: 200px;"></textarea>
+      <p class="hint">Kopier all tekst fra stillingsannonsen og lim inn her.</p>
     </div>
     <div class="field">
-      <label>Stillingstekst <span class="field-optional">— valgfritt, hjelper hvis URL ikke laster</span></label>
-      <textarea id="f-manual" placeholder="Lim inn stillingsteksten her hvis siden ikke lastes automatisk (f.eks. finn.no)..." style="min-height:80px"></textarea>
+      <label>URL <span class="field-optional">— valgfritt, brukes som lenke i annonsen</span></label>
+      <input type="url" id="f-url" placeholder="https://www.finn.no/job/...">
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAddModal()">Avbryt</button>
-      <button class="btn-primary" id="add-submit-btn" onclick="submitJob()">Hent og legg til</button>
+      <button class="btn-primary" id="add-submit-btn" onclick="submitJob()">Send til AI →</button>
     </div>
   </div>
 </div>
@@ -332,11 +319,9 @@
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────
 const GITHUB_OWNER   = 'guled4eva';
 const GITHUB_REPO    = 'oslo-tekniker-jobs';
 const ADMIN_PASSWORD = 'ots-admin-2024'; // CHANGE THIS
-// ─────────────────────────────────────────────────────
 
 const SECTIONS = [
   { id:'bygg',   group:'be',  label:'BYGG',         superClass:'super-be',  tagClass:'tag-bygg',   subClass:'s-bygg',
@@ -352,19 +337,13 @@ const SECTIONS = [
   { id:'it',     group:'it',  label:'IT/DATA',       superClass:'super-it',  tagClass:'tag-it',     subClass:'s-it',
     depts:['Anvendt datateknologi','Dataingeniør','Informasjonsteknologi','Matematisk modellering og datavitenskap – ingeniør'] },
 ];
-const ALL_DEPTS = SECTIONS.flatMap(s => s.depts.map(d => ({ dept: d, section: s.id, group: s.group })));
 const GROUP_LABELS = { be:'BE', mek:'MEK', it:'IT/DATA' };
 
-let jobs = [];
-let activeGroup = 'all';
-let activeSubs = new Set();
+let jobs = [], activeGroup = 'all', activeSubs = new Set();
 let isAdmin = sessionStorage.getItem('ots-admin') === 'yes';
-let isPreview = false;
-let activeJobId = null;
-let editingJobId = null;
+let isPreview = false, activeJobId = null, editingJobId = null;
 let ghToken = sessionStorage.getItem('ots-gh-token') || '';
 
-// ── Load jobs ──
 async function loadJobs() {
   try {
     const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/jobs.json?t=${Date.now()}`);
@@ -373,7 +352,6 @@ async function loadJobs() {
   render();
 }
 
-// ── Toast ──
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -381,13 +359,11 @@ function showToast(msg, isError) {
   setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 3500);
 }
 
-// ── Preview mode ──
 function enterPreview() {
   isPreview = true;
   document.body.classList.add('is-preview');
   document.getElementById('preview-banner').classList.add('visible');
-  closePanel();
-  render();
+  closePanel(); render();
 }
 function exitPreview() {
   isPreview = false;
@@ -396,7 +372,6 @@ function exitPreview() {
   render();
 }
 
-// ── Auth ──
 function applyAdminUI() {
   document.body.classList.toggle('is-admin', isAdmin);
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
@@ -416,7 +391,7 @@ function doLogin() {
   const token = document.getElementById('gh-token-input').value.trim();
   if (pw === ADMIN_PASSWORD && token) {
     isAdmin = true; ghToken = token;
-    sessionStorage.setItem('ots-admin', 'yes');
+    sessionStorage.setItem('ots-admin','yes');
     sessionStorage.setItem('ots-gh-token', token);
     closeLoginModal(); applyAdminUI(); render();
   } else {
@@ -431,7 +406,6 @@ function logout() {
   closePanel(); applyAdminUI(); render();
 }
 
-// ── GitHub dispatch ──
 async function dispatch(eventType, payload) {
   const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/dispatches`, {
     method: 'POST',
@@ -441,36 +415,39 @@ async function dispatch(eventType, payload) {
   if (!res.ok) throw new Error('GitHub API feil ' + res.status);
 }
 
-// ── Add job ──
-function openAddModal() { document.getElementById('add-modal').classList.add('open'); setTimeout(() => document.getElementById('f-url').focus(), 100); }
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('f-jobtext').focus(), 100);
+}
 function closeAddModal() {
   document.getElementById('add-modal').classList.remove('open');
+  document.getElementById('f-jobtext').value = '';
   document.getElementById('f-url').value = '';
-  document.getElementById('f-manual').value = '';
 }
+
 async function submitJob() {
+  const jobText = document.getElementById('f-jobtext').value.trim();
   const url = document.getElementById('f-url').value.trim();
-  const manualText = document.getElementById('f-manual').value.trim();
-  if (!url && !manualText) { showToast('Lim inn en URL eller stillingstekst.', true); return; }
+  if (!jobText) { showToast('Lim inn stillingsteksten først.', true); return; }
   const btn = document.getElementById('add-submit-btn');
   btn.textContent = 'Sender...'; btn.disabled = true;
   const newId = Date.now();
   const posted = new Date().toISOString().split('T')[0];
-  const pending = { id: newId, title: 'Henter stilling...', company: '', location: '', sections: [], url, posted, pending: true };
-  jobs.push(pending);
+  jobs.push({ id: newId, title: 'Henter stilling...', company: '', location: '', sections: [], url, posted, pending: true });
   closeAddModal();
   render();
-  showToast('Sendt! AI henter info — klar om ~30 sekunder.');
+  showToast('Sendt! AI jobber — klar om ~30 sekunder.');
   try {
-    await dispatch('fetch-job', { url, manualText, id: newId, posted });
+    await dispatch('fetch-job', { jobText, url, id: newId, posted });
     pollForJob(newId);
   } catch(e) {
     jobs = jobs.filter(j => j.id !== newId);
     render();
     showToast('Feil: ' + e.message, true);
   }
-  btn.textContent = 'Hent og legg til'; btn.disabled = false;
+  btn.textContent = 'Send til AI →'; btn.disabled = false;
 }
+
 async function pollForJob(id, attempts = 0) {
   if (attempts > 20) return;
   await new Promise(r => setTimeout(r, 7000));
@@ -479,12 +456,11 @@ async function pollForJob(id, attempts = 0) {
     if (!res.ok) { pollForJob(id, attempts + 1); return; }
     const fresh = await res.json();
     const found = fresh.find(j => j.id === id);
-    if (found) { jobs = fresh; render(); showToast('✓ ' + found.title + ' lagt til!'); if (activeJobId === id) openPanel(id); }
+    if (found) { jobs = fresh; render(); showToast('✓ ' + found.title + ' lagt til!'); }
     else pollForJob(id, attempts + 1);
   } catch(e) { pollForJob(id, attempts + 1); }
 }
 
-// ── Delete job ──
 async function deleteJob(id) {
   if (!isAdmin || isPreview) return;
   if (!confirm('Fjerne denne stillingen?')) return;
@@ -492,17 +468,15 @@ async function deleteJob(id) {
   jobs = jobs.filter(j => j.id !== id);
   render();
   try { await dispatch('delete-job', { id }); showToast('Stilling slettet.'); }
-  catch(e) { showToast('Feil ved sletting: ' + e.message, true); }
+  catch(e) { showToast('Feil: ' + e.message, true); }
 }
 
-// ── Edit job ──
 function buildDeptGrid(containerId, checkedDepts) {
   const grid = document.getElementById(containerId);
   grid.innerHTML = '';
   SECTIONS.forEach(sec => {
-    const gKey = GROUP_LABELS[sec.group];
     const grpDiv = document.createElement('div');
-    grpDiv.innerHTML = `<div class="dept-group-label">${sec.label} (${gKey})</div><div class="dept-options"></div>`;
+    grpDiv.innerHTML = `<div class="dept-group-label">${sec.label} (${GROUP_LABELS[sec.group]})</div><div class="dept-options"></div>`;
     grid.appendChild(grpDiv);
     const opts = grpDiv.querySelector('.dept-options');
     sec.depts.forEach(dept => {
@@ -528,8 +502,7 @@ function openEditModal(jobId) {
   document.getElementById('e-deadline').value = job.deadline || '';
   document.getElementById('e-url').value = job.url || '';
   document.getElementById('e-desc').value = job.desc || '';
-  const checkedDepts = (job.sections || []).map(s => s.dept);
-  buildDeptGrid('edit-dept-grid', checkedDepts);
+  buildDeptGrid('edit-dept-grid', (job.sections||[]).map(s=>s.dept));
   document.getElementById('edit-modal').classList.add('open');
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); editingJobId = null; }
@@ -537,31 +510,27 @@ function closeEditModal() { document.getElementById('edit-modal').classList.remo
 async function saveEdit() {
   const btn = document.getElementById('edit-submit-btn');
   btn.textContent = 'Lagrer...'; btn.disabled = true;
-  const checked = [...document.querySelectorAll('#edit-dept-grid .dept-check:checked')];
-  const sections = checked.map(c => JSON.parse(c.value));
+  const sections = [...document.querySelectorAll('#edit-dept-grid .dept-check:checked')].map(c => JSON.parse(c.value));
   const updates = {
-    title:    document.getElementById('e-title').value.trim(),
-    company:  document.getElementById('e-company').value.trim(),
+    title: document.getElementById('e-title').value.trim(),
+    company: document.getElementById('e-company').value.trim(),
     location: document.getElementById('e-location').value.trim(),
     deadline: document.getElementById('e-deadline').value,
-    url:      document.getElementById('e-url').value.trim(),
-    desc:     document.getElementById('e-desc').value.trim(),
+    url: document.getElementById('e-url').value.trim(),
+    desc: document.getElementById('e-desc').value.trim(),
     sections
   };
-  // Update locally immediately
   const idx = jobs.findIndex(j => j.id === editingJobId);
   if (idx !== -1) jobs[idx] = { ...jobs[idx], ...updates };
+  const savedId = editingJobId;
   closeEditModal();
-  if (activeJobId === editingJobId) openPanel(editingJobId);
+  if (activeJobId === savedId) openPanel(savedId);
   render();
-  try {
-    await dispatch('edit-job', { id: editingJobId, updates });
-    showToast('✓ Endringer lagret!');
-  } catch(e) { showToast('Feil ved lagring: ' + e.message, true); }
+  try { await dispatch('edit-job', { id: savedId, updates }); showToast('✓ Endringer lagret!'); }
+  catch(e) { showToast('Feil: ' + e.message, true); }
   btn.textContent = 'Lagre endringer'; btn.disabled = false;
 }
 
-// ── Filters ──
 function buildSubBubbles() {
   const container = document.getElementById('sub-bubbles');
   container.innerHTML = '';
@@ -588,7 +557,6 @@ function setGroup(g) {
   buildSubBubbles(); closePanel(); render();
 }
 
-// ── Panel ──
 function openPanel(jobId) {
   const job = jobs.find(j => j.id === jobId); if (!job || job.pending) return;
   activeJobId = jobId;
@@ -615,7 +583,7 @@ function openPanel(jobId) {
     <hr class="panel-divider">
     <div class="panel-section-label">Om stillingen</div>
     ${job.desc ? `<div class="panel-desc">${job.desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : `<div class="panel-no-desc">Ingen beskrivelse tilgjengelig.</div>`}
-    <a href="${job.url||'#'}" target="_blank" class="panel-apply-btn">Se full stillingsannonse ↗</a>
+    ${job.url ? `<a href="${job.url}" target="_blank" class="panel-apply-btn">Se full stillingsannonse ↗</a>` : `<button class="panel-apply-btn" onclick="alert('Ta kontakt med Oslo Tekniker Samfund.')">Ta kontakt</button>`}
     ${posted ? `<div class="panel-posted">Lagt ut ${posted}</div>` : ''}`;
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('main').classList.add('panel-open');
@@ -630,19 +598,18 @@ function closePanel() {
   document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
 }
 
-// ── Render ──
 function jobMatchesFilter(job) {
   const secs = job.sections || [];
   if (activeGroup !== 'all' && !secs.some(s => GROUP_LABELS[s.group] === activeGroup)) return false;
   if (activeSubs.size > 0 && !secs.some(s => activeSubs.has(s.dept))) return false;
   return true;
 }
+
 function render() {
   const showAdminControls = isAdmin && !isPreview;
   const main = document.getElementById('main');
   main.innerHTML = '';
-  const visibleSections = SECTIONS.filter(sec => activeGroup === 'all' || GROUP_LABELS[sec.group] === activeGroup);
-  visibleSections.forEach(sec => {
+  SECTIONS.filter(sec => activeGroup === 'all' || GROUP_LABELS[sec.group] === activeGroup).forEach(sec => {
     const secJobs = jobs.filter(job => jobMatchesFilter(job) && (job.sections||[]).some(s => s.section === sec.id));
     if (secJobs.length === 0 && activeSubs.size > 0 && !showAdminControls) return;
     const gKey = GROUP_LABELS[sec.group];
@@ -677,7 +644,7 @@ function render() {
         <div class="job-company">${job.company||''}</div>
         <div class="job-location">${job.location?'📍 '+job.location:''}</div>
         ${job.desc?`<div class="job-snippet">${job.desc}</div>`:''}
-        ${job.pending?`<span class="job-pending">⏳ Henter info...</span>`:''}`;
+        ${job.pending?`<span class="job-pending">⏳ AI jobber...</span>`:''}`;
       if (!job.pending) card.addEventListener('click', () => openPanel(job.id));
       grid.appendChild(card);
     });
@@ -691,7 +658,6 @@ function render() {
   });
 }
 
-// close on backdrop
 ['login-modal','add-modal','edit-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target === document.getElementById(id)) {
