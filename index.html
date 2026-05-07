@@ -24,7 +24,7 @@
   .logo-mark { width: 40px; height: 40px; background: #0C447C; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #E6F1FB; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; }
   .logo-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
   .logo-sub { font-size: 12px; color: var(--text-muted); margin-top: -2px; }
-  .header-right { display: flex; align-items: center; gap: 8px; }
+  .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .admin-badge { font-size: 12px; color: var(--green-dark); background: var(--green-light); padding: 4px 12px; border-radius: 100px; display: none; }
   .admin-badge.visible { display: inline-block; }
   .preview-banner { display: none; background: var(--amber-light); border-bottom: 1px solid var(--amber-mid); padding: 8px 2rem; font-size: 13px; color: var(--amber-dark); text-align: center; }
@@ -36,6 +36,10 @@
   .btn-ui.add-main { background: #185FA5; color: #fff; border-color: #185FA5; }
   .btn-ui.add-main:hover { background: #0C447C; }
   .btn-ui.preview-btn { background: var(--amber-light); color: var(--amber-dark); border-color: var(--amber-mid); }
+  .btn-ui.preview-btn:hover { background: #f0e0c0; }
+  .btn-ui.sync-btn { background: var(--green-light); color: var(--green-dark); border-color: var(--green-mid); }
+  .btn-ui.sync-btn:hover { background: #d4ebbe; }
+  .btn-ui.sync-btn:disabled { opacity: .6; cursor: not-allowed; }
   .btn-ui.logout-btn { color: #b91c1c; }
 
   .hero { background: #fff; border-bottom: 1px solid var(--border); padding: 2.5rem 2rem 2rem; }
@@ -98,6 +102,7 @@
   .job-location{ font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .job-snippet { font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .job-pending { font-size: 11px; color: var(--amber-dark); background: var(--amber-light); padding: 2px 8px; border-radius: 100px; display: inline-block; margin-top: 6px; }
+  .job-source  { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
   .job-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; opacity: 0; transition: opacity .15s; font-family: sans-serif; display: none; z-index: 2; }
   .job-card:hover .job-delete { opacity: 1; }
   .job-delete:hover { background: #fef2f2; color: #b91c1c; }
@@ -168,11 +173,12 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.error { background: #b91c1c; }
   footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: 12px; color: var(--text-muted); background: #fff; margin-top: 2rem; }
-  @media (max-width: 800px) {
+  @media (max-width: 900px) {
     .detail-panel.open { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100% !important; min-width: 0 !important; z-index: 100; border-left: none; height: 100%; }
     .panel-inner { min-width: 0; }
     main.panel-open { max-width: 100%; }
-    header, .hero, .filter-row, main { padding-left: 1rem; padding-right: 1rem; }
+    header { padding: 0 1rem; height: auto; min-height: 68px; padding-top: 8px; padding-bottom: 8px; }
+    .hero, .filter-row, main { padding-left: 1rem; padding-right: 1rem; }
   }
 </style>
 </head>
@@ -193,6 +199,7 @@
   </div>
   <div class="header-right">
     <span class="admin-badge" id="admin-badge">Admin</span>
+    <button class="btn-ui sync-btn admin-only" id="sync-btn" onclick="triggerSync()">🔄 Hent fra Arbeidsplassen</button>
     <button class="btn-ui preview-btn admin-only" onclick="enterPreview()">👁 Forhåndsvis</button>
     <button class="btn-ui add-main admin-only" onclick="openAddModal()">+ Legg til stilling</button>
     <button class="btn-ui logout-btn admin-only" onclick="logout()">Logg ut</button>
@@ -333,12 +340,14 @@ function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast' + (isError ? ' error' : '') + ' show';
-  setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 3500);
+  setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 4000);
 }
 
+// ── Preview ──
 function enterPreview() { isPreview = true; document.body.classList.add('is-preview'); document.getElementById('preview-banner').classList.add('visible'); closePanel(); render(); }
-function exitPreview() { isPreview = false; document.body.classList.remove('is-preview'); document.getElementById('preview-banner').classList.remove('visible'); render(); }
+function exitPreview()  { isPreview = false; document.body.classList.remove('is-preview'); document.getElementById('preview-banner').classList.remove('visible'); render(); }
 
+// ── Auth ──
 function applyAdminUI() {
   document.body.classList.toggle('is-admin', isAdmin);
   document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
@@ -373,55 +382,50 @@ function logout() {
   closePanel(); applyAdminUI(); render();
 }
 
-// Write a file to the GitHub repo using the Contents API
+// ── GitHub helpers ──
 async function writeFile(path, content, message) {
-  // Get current SHA if file exists
-  let sha = undefined;
+  let sha;
   try {
-    const existing = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+    const r = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
       headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json' }
     });
-    if (existing.ok) {
-      const data = await existing.json();
-      sha = data.sha;
-    }
+    if (r.ok) sha = (await r.json()).sha;
   } catch(e) {}
-
   const body = { message, content: btoa(unescape(encodeURIComponent(content))) };
   if (sha) body.sha = sha;
-
   const res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
     method: 'PUT',
     headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error('GitHub feil ' + res.status + ': ' + (err.message || ''));
-  }
+  if (!res.ok) { const e = await res.json(); throw new Error('GitHub ' + res.status + ': ' + (e.message||'')); }
 }
 
-// Delete a file from the repo
-async function deleteFile(path, message) {
-  try {
-    const existing = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
-      headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!existing.ok) return;
-    const data = await existing.json();
-    await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, sha: data.sha })
-    });
-  } catch(e) {}
-}
-
-// Write jobs.json directly to the repo
 async function writeJobsJson(jobsData) {
   await writeFile('jobs.json', JSON.stringify(jobsData, null, 2), 'Update jobs.json');
 }
 
+// ── Sync from Arbeidsplassen ──
+async function triggerSync() {
+  const btn = document.getElementById('sync-btn');
+  btn.textContent = '⏳ Starter...'; btn.disabled = true;
+  try {
+    const res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/actions/workflows/auto-fetch.yml/dispatches', {
+      method: 'POST',
+      headers: { 'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main' })
+    });
+    if (!res.ok) throw new Error('Feil ' + res.status);
+    showToast('✓ Henting startet! Nye stillinger dukker opp om ~2 minutter.');
+    // Reload jobs after 2 minutes
+    setTimeout(() => loadJobs(), 120000);
+  } catch(e) {
+    showToast('Feil ved synkronisering: ' + e.message, true);
+  }
+  setTimeout(() => { btn.textContent = '🔄 Hent fra Arbeidsplassen'; btn.disabled = false; }, 5000);
+}
+
+// ── Add job manually ──
 function openAddModal() { document.getElementById('add-modal').classList.add('open'); setTimeout(() => document.getElementById('f-jobtext').focus(), 100); }
 function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); document.getElementById('f-jobtext').value = ''; document.getElementById('f-url').value = ''; }
 
@@ -433,17 +437,12 @@ async function submitJob() {
   btn.textContent = 'Sender...'; btn.disabled = true;
   const newId = Date.now();
   const posted = new Date().toISOString().split('T')[0];
-
-  // Add pending placeholder
   jobs.push({ id: newId, title: 'Henter stilling...', company: '', location: '', sections: [], url, posted, pending: true });
   closeAddModal();
   render();
   showToast('Sendt! AI jobber — klar om ~45 sekunder.');
-
   try {
-    // Write pending-job.json to repo — this triggers the workflow
-    const pendingData = JSON.stringify({ id: newId, jobText, url, posted });
-    await writeFile('pending-job.json', pendingData, 'Add pending job ' + newId);
+    await writeFile('pending-job.json', JSON.stringify({ id: newId, jobText, url, posted }), 'Add pending job ' + newId);
     pollForJob(newId);
   } catch(e) {
     jobs = jobs.filter(j => j.id !== newId);
@@ -453,7 +452,8 @@ async function submitJob() {
   btn.textContent = 'Send til AI →'; btn.disabled = false;
 }
 
-async function pollForJob(id, attempts = 0) {
+async function pollForJob(id, attempts) {
+  attempts = attempts || 0;
   if (attempts > 25) return;
   await new Promise(r => setTimeout(r, 7000));
   try {
@@ -461,28 +461,23 @@ async function pollForJob(id, attempts = 0) {
     if (!res.ok) { pollForJob(id, attempts + 1); return; }
     const fresh = await res.json();
     const found = fresh.find(j => j.id === id);
-    if (found && !found.pending) {
-      jobs = fresh;
-      render();
-      showToast('✓ ' + found.title + ' er lagt til!');
-    } else {
-      pollForJob(id, attempts + 1);
-    }
+    if (found && !found.pending) { jobs = fresh; render(); showToast('✓ ' + found.title + ' er lagt til!'); }
+    else pollForJob(id, attempts + 1);
   } catch(e) { pollForJob(id, attempts + 1); }
 }
 
+// ── Delete job ──
 async function deleteJob(id) {
   if (!isAdmin || isPreview) return;
   if (!confirm('Fjerne denne stillingen?')) return;
   if (activeJobId === id) closePanel();
   jobs = jobs.filter(j => j.id !== id);
   render();
-  try {
-    await writeJobsJson(jobs);
-    showToast('Stilling slettet.');
-  } catch(e) { showToast('Feil: ' + e.message, true); }
+  try { await writeJobsJson(jobs); showToast('Stilling slettet.'); }
+  catch(e) { showToast('Feil: ' + e.message, true); }
 }
 
+// ── Edit job ──
 function buildDeptGrid(containerId, checkedDepts) {
   const grid = document.getElementById(containerId);
   grid.innerHTML = '';
@@ -508,12 +503,12 @@ function buildDeptGrid(containerId, checkedDepts) {
 function openEditModal(jobId) {
   const job = jobs.find(j => j.id === jobId); if (!job) return;
   editingJobId = jobId;
-  document.getElementById('e-title').value = job.title || '';
-  document.getElementById('e-company').value = job.company || '';
+  document.getElementById('e-title').value    = job.title    || '';
+  document.getElementById('e-company').value  = job.company  || '';
   document.getElementById('e-location').value = job.location || '';
   document.getElementById('e-deadline').value = job.deadline || '';
-  document.getElementById('e-url').value = job.url || '';
-  document.getElementById('e-desc').value = job.desc || '';
+  document.getElementById('e-url').value      = job.url      || '';
+  document.getElementById('e-desc').value     = job.desc     || '';
   buildDeptGrid('edit-dept-grid', (job.sections||[]).map(s=>s.dept));
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -524,12 +519,12 @@ async function saveEdit() {
   btn.textContent = 'Lagrer...'; btn.disabled = true;
   const sections = [...document.querySelectorAll('#edit-dept-grid .dept-check:checked')].map(c => JSON.parse(c.value));
   const updates = {
-    title: document.getElementById('e-title').value.trim(),
-    company: document.getElementById('e-company').value.trim(),
+    title:    document.getElementById('e-title').value.trim(),
+    company:  document.getElementById('e-company').value.trim(),
     location: document.getElementById('e-location').value.trim(),
     deadline: document.getElementById('e-deadline').value,
-    url: document.getElementById('e-url').value.trim(),
-    desc: document.getElementById('e-desc').value.trim(),
+    url:      document.getElementById('e-url').value.trim(),
+    desc:     document.getElementById('e-desc').value.trim(),
     sections
   };
   const idx = jobs.findIndex(j => j.id === editingJobId);
@@ -538,13 +533,12 @@ async function saveEdit() {
   closeEditModal();
   if (activeJobId === savedId) openPanel(savedId);
   render();
-  try {
-    await writeJobsJson(jobs);
-    showToast('✓ Endringer lagret!');
-  } catch(e) { showToast('Feil: ' + e.message, true); }
+  try { await writeJobsJson(jobs); showToast('✓ Endringer lagret!'); }
+  catch(e) { showToast('Feil: ' + e.message, true); }
   btn.textContent = 'Lagre endringer'; btn.disabled = false;
 }
 
+// ── Filters ──
 function buildSubBubbles() {
   const container = document.getElementById('sub-bubbles');
   container.innerHTML = '';
@@ -571,12 +565,16 @@ function setGroup(g) {
   buildSubBubbles(); closePanel(); render();
 }
 
+// ── Panel ──
 function openPanel(jobId) {
   const job = jobs.find(j => j.id === jobId); if (!job || job.pending) return;
   activeJobId = jobId;
   const deadline = job.deadline ? new Date(job.deadline).toLocaleDateString('no-NO',{day:'numeric',month:'long',year:'numeric'}) : null;
   const posted   = job.posted   ? new Date(job.posted).toLocaleDateString('no-NO',{day:'numeric',month:'long',year:'numeric'}) : null;
-  const tagsHtml = (job.sections||[]).map(s => { const sec = SECTIONS.find(x => x.id === s.section); return sec ? '<span class="card-dept-tag ' + sec.tagClass + '">' + s.dept + '</span>' : ''; }).join('');
+  const tagsHtml = (job.sections||[]).map(s => {
+    const sec = SECTIONS.find(x => x.id === s.section);
+    return sec ? '<span class="card-dept-tag ' + sec.tagClass + '">' + s.dept + '</span>' : '';
+  }).join('');
   document.getElementById('panel-inner').innerHTML =
     '<div class="panel-top-btns">' +
       '<button class="panel-btn edit-btn" onclick="openEditModal(' + job.id + ')">✏️ Rediger</button>' +
@@ -589,12 +587,17 @@ function openPanel(jobId) {
       (job.location ? '<div class="panel-meta-row"><span class="panel-meta-label">Sted</span><span class="panel-meta-value">📍 ' + job.location + '</span></div>' : '') +
       '<div class="panel-meta-row"><span class="panel-meta-label">Faggruppe</span><span class="panel-meta-value">' + ((job.sections||[]).map(s=>s.dept).join(', ') || '—') + '</span></div>' +
       (deadline ? '<div class="panel-meta-row"><span class="panel-meta-label">Frist</span><span class="panel-meta-value">⏰ ' + deadline + '</span></div>' : '') +
-      (job.url ? '<div class="panel-meta-row"><span class="panel-meta-label">Kilde</span><span class="panel-meta-value"><a href="' + job.url + '" target="_blank" style="color:#185FA5;text-decoration:none">Se original ↗</a></span></div>' : '') +
+      (job.source === 'arbeidsplassen' ? '<div class="panel-meta-row"><span class="panel-meta-label">Kilde</span><span class="panel-meta-value">Arbeidsplassen.no</span></div>' : '') +
+      (job.url ? '<div class="panel-meta-row"><span class="panel-meta-label">Lenke</span><span class="panel-meta-value"><a href="' + job.url + '" target="_blank" style="color:#185FA5;text-decoration:none">Se original ↗</a></span></div>' : '') +
     '</div>' +
     '<hr class="panel-divider">' +
     '<div class="panel-section-label">Om stillingen</div>' +
-    (job.desc ? '<div class="panel-desc">' + job.desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '<div class="panel-no-desc">Ingen beskrivelse tilgjengelig.</div>') +
-    (job.url ? '<a href="' + job.url + '" target="_blank" class="panel-apply-btn">Se full stillingsannonse ↗</a>' : '<button class="panel-apply-btn" onclick="alert(\'Ta kontakt med Oslo Tekniker Samfund.\')">Ta kontakt</button>') +
+    (job.desc
+      ? '<div class="panel-desc">' + job.desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      : '<div class="panel-no-desc">Ingen beskrivelse tilgjengelig.</div>') +
+    (job.url
+      ? '<a href="' + job.url + '" target="_blank" class="panel-apply-btn">Se full stillingsannonse ↗</a>'
+      : '<button class="panel-apply-btn" onclick="alert(\'Ta kontakt med Oslo Tekniker Samfund.\')">Ta kontakt</button>') +
     (posted ? '<div class="panel-posted">Lagt ut ' + posted + '</div>' : '');
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('main').classList.add('panel-open');
@@ -609,13 +612,13 @@ function closePanel() {
   document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
 }
 
+// ── Render ──
 function jobMatchesFilter(job) {
   const secs = job.sections || [];
   if (activeGroup !== 'all' && !secs.some(s => GROUP_LABELS[s.group] === activeGroup)) return false;
   if (activeSubs.size > 0 && !secs.some(s => activeSubs.has(s.dept))) return false;
   return true;
 }
-
 function render() {
   const showAdminControls = isAdmin && !isPreview;
   const main = document.getElementById('main');
@@ -653,16 +656,17 @@ function render() {
         '<div class="card-tags">' + tagsHtml + '</div>' +
         '<div class="job-title">' + job.title + '</div>' +
         '<div class="job-company">' + (job.company||'') + '</div>' +
-        '<div class="job-location">' + (job.location?'📍 '+job.location:'') + '</div>' +
-        (job.desc?'<div class="job-snippet">'+job.desc+'</div>':'') +
-        (job.pending?'<span class="job-pending">⏳ AI jobber...</span>':'');
+        '<div class="job-location">' + (job.location ? '📍 '+job.location : '') + '</div>' +
+        (job.desc ? '<div class="job-snippet">' + job.desc + '</div>' : '') +
+        (job.source === 'arbeidsplassen' ? '<div class="job-source">Arbeidsplassen.no</div>' : '') +
+        (job.pending ? '<span class="job-pending">⏳ AI jobber...</span>' : '');
       if (!job.pending) card.addEventListener('click', () => openPanel(job.id));
       grid.appendChild(card);
     });
     if (showAdminControls) {
       const addCard = document.createElement('button');
       addCard.className = 'add-card';
-      addCard.innerHTML = '<span style="font-size:20px;line-height:1">+</span> Legg til stilling';
+      addCard.innerHTML = '<span style="font-size:20px;line-height:1">+</span> Legg til stilling manuelt';
       addCard.onclick = openAddModal;
       grid.appendChild(addCard);
     }
@@ -678,7 +682,9 @@ function render() {
     }
   });
 });
-document.addEventListener('keydown', e => { if (e.key==='Escape') { closePanel(); closeLoginModal(); closeAddModal(); closeEditModal(); } });
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { closePanel(); closeLoginModal(); closeAddModal(); closeEditModal(); }
+});
 
 applyAdminUI();
 setGroup('all');
