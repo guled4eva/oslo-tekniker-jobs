@@ -2,8 +2,8 @@ name: Auto-fetch from Arbeidsplassen
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # 15:00 Oslo time (UTC+1), 14:00 UTC
-  workflow_dispatch:       # also allows manual trigger from GitHub Actions tab
+    - cron: '0 14 * * *'  # 15:00 Oslo time (UTC+1)
+  workflow_dispatch:       # allows manual trigger from GitHub Actions tab or website
 
 jobs:
   fetch:
@@ -26,6 +26,7 @@ jobs:
       - name: Fetch and categorize jobs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NAV_API_TOKEN: ${{ secrets.NAV_API_TOKEN }}
         run: node auto-fetch-runner.js
 
       - name: Commit jobs.json
