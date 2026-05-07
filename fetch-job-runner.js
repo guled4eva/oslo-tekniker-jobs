@@ -52,7 +52,7 @@ async function main() {
     '{',
     '  "title": "job title",',
     '  "company": "company name",',
-    '  "location": "city or municipality in Norway",',
+    '  "location": "specific city or municipality in Norway, not a region. If only region is available (e.g. Akershus, Viken, Greater Oslo), write Oslo instead",',
     '  "deadline": "YYYY-MM-DD or empty string if not found",',
     '  "description": "clean job description max 600 words, preserve paragraphs with \\n\\n, remove irrelevant UI text",',
     '  "sections": ["exact dept name from list above"]',
