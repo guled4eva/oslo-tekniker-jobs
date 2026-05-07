@@ -1,6 +1,5 @@
 const fs = require('fs');
 
-// All known faggrupper with their keywords to help pre-filter
 const allDepts = [
   { dept: 'Konstruksjonsteknikk', section: 'bygg', group: 'be' },
   { dept: 'By- og transportplanlegging', section: 'bygg', group: 'be' },
@@ -20,114 +19,122 @@ const allDepts = [
 
 const deptList = allDepts.map(d => '- ' + d.dept).join('\n');
 
-// Search keywords to send to Arbeidsplassen
-const SEARCH_TERMS = [
-  'konstruksjonsingeniør',
-  'byplanlegger',
-  'VA-ingeniør',
-  'energiingeniør',
-  'mekatronikk',
-  'automatisering',
-  'elektronikkingeniør',
-  'bioteknologi',
-  'kjemiingeniør',
-  'dataingeniør',
-  'IT-ingeniør',
-  'softwareutvikler',
-  'sivilingeniør',
+// Keywords to pre-filter relevant ads before sending to Gemini
+const RELEVANT_KEYWORDS = [
+  'ingeniør', 'engineer', 'sivilingeniør', 'konstruksjon', 'byplanlegg',
+  'vann', 'avløp', 'energi', 'mekatronikk', 'automatisering', 'robotikk',
+  'elektronikk', 'bioteknologi', 'kjemi', 'dataingeniør', 'software',
+  'utvikler', 'tekniker', 'teknolog', 'maskin', 'elektro', 'bygg',
+  'infrastruktur', 'transport', 'miljøteknikk', 'programvare'
 ];
+
+function isLikelyRelevant(title, description) {
+  const text = (title + ' ' + description).toLowerCase();
+  return RELEVANT_KEYWORDS.some(kw => text.includes(kw));
+}
 
 async function main() {
   const fetch = (await import('node-fetch')).default;
 
+  const NAV_TOKEN = process.env.NAV_API_TOKEN;
+  const GEMINI_KEY = process.env.GEMINI_API_KEY;
+
+  if (!NAV_TOKEN) { console.log('NAV_API_TOKEN not set'); process.exit(1); }
+  if (!GEMINI_KEY) { console.log('GEMINI_API_KEY not set'); process.exit(1); }
+
   // Load existing jobs
   let jobs = [];
-  try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) { console.log('Starting fresh'); }
+  try { jobs = JSON.parse(fs.readFileSync('jobs.json', 'utf8')); } catch(e) { console.log('Starting with empty jobs.json'); }
 
-  // Track existing Arbeidsplassen URLs to avoid duplicates
-  const existingUrls = new Set(jobs.map(j => j.url).filter(Boolean));
-  const existingIds = new Set(jobs.map(j => j.arbeidsplassenId).filter(Boolean));
-
+  const existingNavIds = new Set(jobs.map(j => j.arbeidsplassenId).filter(Boolean));
+  const existingUrls  = new Set(jobs.map(j => j.url).filter(Boolean));
   console.log('Existing jobs:', jobs.length);
-  console.log('Fetching from Arbeidsplassen...');
 
-  // Fetch from Arbeidsplassen API
-  const newListings = [];
-  const seen = new Set();
+  // Fetch latest feed page from NAV
+  console.log('Fetching NAV feed...');
+  let feedItems = [];
 
-  for (const term of SEARCH_TERMS) {
+  try {
+    const res = await fetch('https://pam-stilling-feed.nav.no/api/v1/feed', {
+      headers: {
+        'Authorization': 'Bearer ' + NAV_TOKEN,
+        'Accept': 'application/json'
+      }
+    });
+    console.log('NAV feed HTTP status:', res.status);
+    if (!res.ok) {
+      const txt = await res.text();
+      console.log('Error body:', txt.slice(0, 400));
+      process.exit(1);
+    }
+    const data = await res.json();
+    feedItems = (data.items || []);
+    console.log('Total feed items:', feedItems.length);
+  } catch(e) {
+    console.log('Failed to fetch NAV feed:', e.message);
+    process.exit(1);
+  }
+
+  // Only active ads we haven't seen before
+  const candidates = feedItems.filter(item => {
+    const entry = item._feed_entry || {};
+    if (entry.status !== 'ACTIVE') return false;
+    const adId = entry.id || entry.uuid;
+    const adUrl = item.url || ('https://arbeidsplassen.nav.no/stillinger/stilling/' + adId);
+    if (existingNavIds.has(String(adId))) return false;
+    if (existingUrls.has(adUrl)) return false;
+    return true;
+  });
+
+  console.log('New active candidates:', candidates.length);
+
+  // For each candidate, fetch the full ad and check relevance
+  let added = 0;
+  const MAX_TO_PROCESS = 50; // limit per run to avoid timeout
+
+  for (const item of candidates.slice(0, MAX_TO_PROCESS)) {
     try {
-      const url = 'https://arbeidsplassen.nav.no/api/v2/ads?q=' + encodeURIComponent(term) + '&size=10&sort=published';
-      const res = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Oslo Tekniker Samfund Job Board'
-        }
-      });
+      const entry = item._feed_entry || {};
+      const adId = String(entry.id || entry.uuid || '');
+      const adUrl = item.url
+        ? 'https://pam-stilling-feed.nav.no' + item.url
+        : null;
 
-      if (!res.ok) {
-        console.log('Arbeidsplassen error for "' + term + '":', res.status);
+      // Fetch full ad details
+      let ad = {};
+      if (adUrl) {
+        const adRes = await fetch(adUrl, {
+          headers: { 'Authorization': 'Bearer ' + NAV_TOKEN, 'Accept': 'application/json' }
+        });
+        if (adRes.ok) ad = await adRes.json();
+      }
+
+      const title = ad.title || entry.title || '';
+      const description = ad.description || ad.adText || '';
+      const employer = ad.employer?.name || ad.businessName || '';
+      const locationCity = ad.locationList?.[0]?.city || ad.location || 'Oslo';
+      const deadline = ad.applicationDue || ad.expires || '';
+      const publicUrl = 'https://arbeidsplassen.nav.no/stillinger/stilling/' + adId;
+
+      // Pre-filter by keyword before calling Gemini
+      if (!isLikelyRelevant(title, description)) {
         continue;
       }
 
-      const data = await res.json();
-      const listings = data.content || data.ads || data || [];
+      console.log('Evaluating:', title);
 
-      for (const ad of listings) {
-        const adId = ad.uuid || ad.id || String(ad.id);
-        const adUrl = ad.applicationUrl || ad.sourceurl || ('https://arbeidsplassen.nav.no/stillinger/stilling/' + adId);
-
-        // Skip if already in our jobs or already seen this run
-        if (existingUrls.has(adUrl) || existingIds.has(adId) || seen.has(adId)) continue;
-        seen.add(adId);
-
-        newListings.push({
-          id: adId,
-          url: adUrl,
-          title: ad.title || '',
-          employer: ad.employer?.name || ad.businessName || '',
-          location: ad.locationList?.[0]?.city || ad.location || '',
-          deadline: ad.applicationDue || ad.expires || '',
-          description: ad.description || ad.adText || '',
-          published: ad.published || ''
-        });
-      }
-
-      // Small delay to be polite to the API
-      await new Promise(r => setTimeout(r, 500));
-    } catch(e) {
-      console.log('Error fetching term "' + term + '":', e.message);
-    }
-  }
-
-  console.log('Found ' + newListings.length + ' new listings to evaluate');
-
-  if (newListings.length === 0) {
-    console.log('No new listings found, done.');
-    return;
-  }
-
-  // Send each listing to Gemini to categorize
-  let added = 0;
-  for (const listing of newListings) {
-    try {
-      const jobText = [
-        'Title: ' + listing.title,
-        'Employer: ' + listing.employer,
-        'Location: ' + listing.location,
-        'Description: ' + listing.description.slice(0, 3000)
-      ].join('\n');
-
+      // Ask Gemini if it fits and which dept
       const promptParts = [
         'You are helping categorize a Norwegian engineering job posting for Oslo Tekniker Samfund, a student engineering organization.',
         '',
-        'Job posting:',
-        jobText,
+        'Job title: ' + title,
+        'Employer: ' + employer,
+        'Description: ' + description.slice(0, 2000),
         '',
         'Available faggrupper:',
         deptList,
         '',
-        'Does this job belong to ANY of the faggrupper above? Engineering jobs only — skip general office, sales, manual labor, or management jobs with no engineering focus.',
+        'Does this job belong to ANY of the faggrupper above? Only include engineering/technical roles — skip management, sales, general office, or manual labor roles with no engineering focus.',
         '',
         'Return ONLY valid JSON:',
         '{',
@@ -136,16 +143,15 @@ async function main() {
         '  "company": "company name",',
         '  "location": "specific city in Norway, use Oslo if only region given",',
         '  "deadline": "YYYY-MM-DD or empty string",',
-        '  "description": "clean description max 400 words, preserve paragraphs with \\n\\n",',
+        '  "description": "clean description max 400 words, paragraphs separated by \\n\\n",',
         '  "sections": ["exact dept name from list"]',
         '}',
         '',
-        'If relevant is false, still return the JSON but sections can be empty.',
-        'Pick 1-3 most relevant departments. Only use exact names from the list.',
+        'sections must use ONLY exact names from the list. Pick 1-3 most relevant.',
       ];
 
       const geminiRes = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + process.env.GEMINI_API_KEY,
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -161,10 +167,10 @@ async function main() {
       const clean = raw.replace(/```json|```/g, '').trim();
 
       let extracted = {};
-      try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error for', listing.title); continue; }
+      try { extracted = JSON.parse(clean); } catch(e) { console.log('Parse error for', title); continue; }
 
       if (!extracted.relevant) {
-        console.log('Not relevant:', listing.title);
+        console.log('Not relevant:', title);
         continue;
       }
 
@@ -174,62 +180,59 @@ async function main() {
         .map(d => ({ dept: d.dept, section: d.section, group: d.group }));
 
       if (resolvedSections.length === 0) {
-        console.log('No sections matched for:', listing.title);
+        console.log('No sections matched for:', title);
         continue;
       }
 
       // Format deadline
-      let deadline = extracted.deadline || '';
-      if (deadline && !deadline.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        try {
-          const d = new Date(deadline);
-          if (!isNaN(d)) deadline = d.toISOString().split('T')[0];
-          else deadline = '';
-        } catch(e) { deadline = ''; }
+      let dl = extracted.deadline || deadline || '';
+      if (dl && !dl.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        try { const d = new Date(dl); if (!isNaN(d)) dl = d.toISOString().split('T')[0]; else dl = ''; }
+        catch(e) { dl = ''; }
       }
 
       const newJob = {
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        arbeidsplassenId: listing.id,
-        title: extracted.title || listing.title,
-        company: extracted.company || listing.employer,
-        location: extracted.location || listing.location || 'Oslo',
-        deadline,
+        id: Date.now() + Math.floor(Math.random() * 9999),
+        arbeidsplassenId: adId,
+        title: extracted.title || title,
+        company: extracted.company || employer,
+        location: extracted.location || locationCity,
+        deadline: dl,
         desc: extracted.description || '',
         sections: resolvedSections,
-        url: listing.url,
+        url: publicUrl,
         posted: new Date().toISOString().split('T')[0],
         source: 'arbeidsplassen'
       };
 
       jobs.push(newJob);
-      existingUrls.add(listing.url);
-      existingIds.add(listing.id);
+      existingNavIds.add(adId);
+      existingUrls.add(publicUrl);
       added++;
       console.log('Added:', newJob.title, '|', resolvedSections.map(s => s.dept).join(', '));
 
-      // Delay between Gemini calls to avoid rate limiting
-      await new Promise(r => setTimeout(r, 1000));
+      // Be polite to both APIs
+      await new Promise(r => setTimeout(r, 1200));
 
     } catch(e) {
-      console.log('Error processing listing:', listing.title, e.message);
+      console.log('Error processing item:', e.message);
     }
   }
 
-  // Remove jobs older than 60 days that came from Arbeidsplassen
-  const sixtyDaysAgo = new Date();
-  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+  // Remove Arbeidsplassen jobs older than 60 days
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 60);
   const before = jobs.length;
   jobs = jobs.filter(j => {
-    if (j.source !== 'arbeidsplassen') return true; // keep manual jobs forever
+    if (j.source !== 'arbeidsplassen') return true;
     if (!j.posted) return true;
-    return new Date(j.posted) > sixtyDaysAgo;
+    return new Date(j.posted) > cutoff;
   });
   const removed = before - jobs.length;
   if (removed > 0) console.log('Removed', removed, 'expired Arbeidsplassen jobs');
 
   fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
-  console.log('Done! Added ' + added + ' new jobs. Total jobs: ' + jobs.length);
+  console.log('Done! Added', added, '| Total jobs:', jobs.length);
 }
 
-main().catch(e => { console.error('Fatal error:', e); process.exit(1); });
+main().catch(e => { console.error('Fatal:', e); process.exit(1); });
